@@ -238,8 +238,16 @@ class GraphCtrl extends MetricsPanelCtrl {
     if (event.ctrlKey || event.metaKey || event.shiftKey) {
       if (this.hiddenSeries[serie.alias]) {
         delete this.hiddenSeries[serie.alias];
+        // *** START_OF_CHANGE ****
+        delete this.hiddenSeries[serie.alias + "_low_DO_NOT_TOUCH"];
+        delete this.hiddenSeries[serie.alias + "_high_DO_NOT_TOUCH"];
+        // *** END_OF_CHANGE ****
       } else {
         this.hiddenSeries[serie.alias] = true;
+        // *** START_OF_CHANGE ****
+        this.hiddenSeries[serie.alias + "_low_DO_NOT_TOUCH"] = true;
+        this.hiddenSeries[serie.alias + "_high_DO_NOT_TOUCH"] = true;
+        // *** END_OF_CHANGE ****
       }
     } else {
       this.toggleSeriesExclusiveMode(serie);
@@ -252,11 +260,20 @@ class GraphCtrl extends MetricsPanelCtrl {
 
     if (hidden[serie.alias]) {
       delete hidden[serie.alias];
+      // *** START_OF_CHANGE ****
+      delete hidden[serie.alias + "_low_DO_NOT_TOUCH"];
+      delete hidden[serie.alias + "_high_DO_NOT_TOUCH"];
+      // *** END_OF_CHANGE ****
     }
 
     // check if every other series is hidden
     var alreadyExclusive = _.every(this.seriesList, value => {
-      if (value.alias === serie.alias) {
+      if (value.alias === serie.alias
+          // *** START_OF_CHANGE ****
+          || value.alias === serie.alias + "_low_DO_NOT_TOUCH"
+          || value.alias === serie.alias + "_high_DO_NOT_TOUCH"
+          // *** END_OF_CHANGE ****
+         ) {
         return true;
       }
 
@@ -271,7 +288,12 @@ class GraphCtrl extends MetricsPanelCtrl {
     } else {
       // hide all but this serie
       _.each(this.seriesList, value => {
-        if (value.alias === serie.alias) {
+        if (value.alias === serie.alias
+            // *** START_OF_CHANGE ****
+            || value.alias === serie.alias + "_low_DO_NOT_TOUCH"
+            || value.alias === serie.alias + "_high_DO_NOT_TOUCH"
+            // *** END_OF_CHANGE ****
+           ) {
           return;
         }
 
