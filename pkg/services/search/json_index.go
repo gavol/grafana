@@ -93,14 +93,18 @@ func (index *JsonDashIndex) updateIndex() error {
 			return nil
 		}
 
-		if strings.HasSuffix(f.Name(), ".json") {
+		// *** START_OF_CHANGE ***
+		//if strings.HasSuffix(f.Name(), ".json") {
+		// *** END_OF_CHANGE ***
 			dash, err := loadDashboardFromFile(path)
 			if err != nil {
 				return err
 			}
 
 			items = append(items, dash)
-		}
+		// *** START_OF_CHANGE ***
+		//}
+		// *** END_OF_CHANGE ***
 
 		return nil
 	}
