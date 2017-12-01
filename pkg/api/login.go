@@ -127,7 +127,7 @@ func LoginPost(c *middleware.Context, cmd dtos.LoginCommand) Response {
 		c.SetCookie("redirect_to", "", -1, setting.AppSubUrl+"/")
 	}
 
-	metrics.M_Api_Login_Post.Inc(1)
+	metrics.M_Api_Login_Post.Inc()
 
 	return Json(200, result)
 }
@@ -136,6 +136,8 @@ func loginUserWithUser(user *m.User, c *middleware.Context) {
 	if user == nil {
 		log.Error(3, "User login with nil user")
 	}
+
+	c.Resp.Header().Del("Set-Cookie")
 
 	days := 86400 * setting.LogInRememberDays
 	if days > 0 {
