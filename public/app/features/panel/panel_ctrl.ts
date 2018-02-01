@@ -27,6 +27,7 @@ export class PanelCtrl {
   inspector: any;
   editModeInitiated: boolean;
   editMode: any;
+  editorHelpIndex: number;
   height: any;
   containerHeight: any;
   events: Emitter;
@@ -180,6 +181,14 @@ export class PanelCtrl {
     this.calculatePanelHeight();
     this.timing.renderStart = new Date().getTime();
     this.events.emit('render', payload);
+  }
+
+  toggleEditorHelp(index) {
+    if (this.editorHelpIndex === index) {
+      this.editorHelpIndex = null;
+      return;
+    }
+    this.editorHelpIndex = index;
   }
 
   duplicate() {
