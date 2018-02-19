@@ -176,6 +176,12 @@ module.directive('graphLegend', function(popoverSrv, $timeout) {
             continue;
           }
 
+          // *** START_OF_CHANGE ***
+          if (series.lines.show !== undefined && series.lines.show === false) {
+            continue;
+          }
+          // *** END_OF_CHANGE ***  
+            
           var html = '<div class="graph-legend-series';
 
           if (series.yaxis === 2) {
