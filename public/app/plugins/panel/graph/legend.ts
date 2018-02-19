@@ -180,8 +180,8 @@ module.directive('graphLegend', function(popoverSrv, $timeout) {
           if (series.lines.show !== undefined && series.lines.show === false) {
             continue;
           }
-          // *** END_OF_CHANGE ***  
-            
+          // *** END_OF_CHANGE ***
+
           var html = '<div class="graph-legend-series';
 
           if (series.yaxis === 2) {
