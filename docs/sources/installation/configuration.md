@@ -301,7 +301,7 @@ options are `Admin` and `Editor`. e.g. :
 
 `auto_assign_org_role = Viewer`
 
-### viewers can edit
+### viewers_can_edit
 
 Viewers can edit/inspect dashboard settings in the browser. But not save the dashboard.
 Defaults to `false`.
@@ -482,7 +482,7 @@ Set api_url to the resource that returns [OpenID UserInfo](https://connect2id.co
 
 First set up Grafana as an OpenId client "webapplication" in Okta. Then set the Base URIs to `https://<grafana domain>/` and set the Login redirect URIs to `https://<grafana domain>/login/generic_oauth`.
 
-Finaly set up the generic oauth module like this:
+Finally set up the generic oauth module like this:
 ```bash
 [auth.generic_oauth]
 name = Okta

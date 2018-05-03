@@ -29,12 +29,17 @@ export class DataProcessor {
         });
       }
       case 'histogram': {
-        let histogramDataList = [
-          {
-            target: 'count',
-            datapoints: _.concat([], _.flatten(_.map(options.dataList, 'datapoints'))),
-          },
-        ];
+        let histogramDataList;
+        if (this.panel.stack) {
+          histogramDataList = options.dataList;
+        } else {
+          histogramDataList = [
+            {
+              target: 'count',
+              datapoints: _.concat([], _.flatten(_.map(options.dataList, 'datapoints'))),
+            },
+          ];
+        }
         return histogramDataList.map((item, index) => {
           return this.timeSeriesHandler(item, index, options);
         });
@@ -104,14 +109,14 @@ export class DataProcessor {
     var color = this.panel.aliasColors[alias] || colors[colorIndex];
 
     var series = new TimeSeries({
-        datapoints: datapoints,
-        alias: alias,
-        color: color,
-        unit: seriesData.unit,
-        // *** START_OF_CHANGE ****
-        extraOptions : seriesData.options
-        // *** END_OF_CHANGE ****
-     });
+      datapoints: datapoints,
+      alias: alias,
+      color: color,
+      unit: seriesData.unit,
+      // *** START_OF_CHANGE ****
+      extraOptions: seriesData.options,
+      // *** END_OF_CHANGE ****
+    });
 
     if (datapoints && datapoints.length > 0) {
       var last = datapoints[datapoints.length - 1][1];
