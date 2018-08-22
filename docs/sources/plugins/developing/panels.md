@@ -1,16 +1,11 @@
----
-page_title: Plugin panel
-page_description: Panel plugins for Grafana
-page_keywords: grafana, plugins, documentation
----
-
-
 +++
-title = "Installing Plugins"
+title = "Developing Panel Plugins"
+keywords = ["grafana", "plugins", "panel", "documentation"]
 type = "docs"
 [menu.docs]
+name = "Developing Panel Plugins"
 parent = "developing"
-weight = 1
+weight = 4
 +++
 
 

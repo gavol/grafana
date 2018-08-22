@@ -654,6 +654,9 @@ func (sc *scenarioContext) verifyUpdateChildDashboardPermissionsWithOverrideShou
 			}
 
 			_, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, permissionList)
+			if err != nil {
+				sc.reportFailure(tc, nil, err)
+			}
 			sc.updatePermissions = permissionList
 			ok, err := sc.g.CheckPermissionBeforeUpdate(m.PERMISSION_ADMIN, permissionList)
 

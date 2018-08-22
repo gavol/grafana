@@ -23,23 +23,27 @@ function translateFillOption(fill) {
  * Calculate decimals for legend and update values for each series.
  * @param data series data
  * @param panel
+ * @param height
  */
-export function updateLegendValues(data: TimeSeries[], panel) {
+export function updateLegendValues(data: TimeSeries[], panel, height) {
   for (let i = 0; i < data.length; i++) {
     let series = data[i];
-    let yaxes = panel.yaxes;
+    const yaxes = panel.yaxes;
     const seriesYAxis = series.yaxis || 1;
-    let axis = yaxes[seriesYAxis - 1];
-    let { tickDecimals, scaledDecimals } = getFlotTickDecimals(data, axis);
-    let formater = kbn.valueFormats[panel.yaxes[seriesYAxis - 1].format];
+    const axis = yaxes[seriesYAxis - 1];
+    let formater = kbn.valueFormats[axis.format];
 
     // decimal override
     if (_.isNumber(panel.decimals)) {
       series.updateLegendValues(formater, panel.decimals, null);
+    } else if (_.isNumber(axis.decimals)) {
+      series.updateLegendValues(formater, axis.decimals + 1, null);
     } else {
       // auto decimals
       // legend and tooltip gets one more decimal precision
       // than graph legend ticks
+      const { datamin, datamax } = getDataMinMax(data);
+      let { tickDecimals, scaledDecimals } = getFlotTickDecimals(datamin, datamax, axis, height);
       tickDecimals = (tickDecimals || -1) + 1;
       series.updateLegendValues(formater, tickDecimals, scaledDecimals + 2);
     }
@@ -103,6 +107,7 @@ export default class TimeSeries {
     this.alias = opts.alias;
     this.aliasEscaped = _.escape(opts.alias);
     this.color = opts.color;
+    this.bars = { fillColor: opts.color };
     this.valueFormater = kbn.valueFormats.none;
     this.stats = {};
     this.legend = true;
@@ -119,33 +124,35 @@ export default class TimeSeries {
       dashLength: [],
     };
     this.points = {};
-    this.bars = {};
     this.yaxis = 1;
     this.zindex = 0;
     this.nullPointMode = null;
     delete this.stack;
+    delete this.bars.show;
 
     // *** START_OF_CHANGE ****
     if (this.extraOptions !== undefined) {
-        for (var opt in this.extraOptions) {
-            if (this.extraOptions.hasOwnProperty(opt) === true) {
-                this[opt] = this.extraOptions[opt];
-            }
+      for (var opt in this.extraOptions) {
+        if (this.extraOptions.hasOwnProperty(opt) === true) {
+          this[opt] = this.extraOptions[opt];
         }
+      }
 
-        // Fix for Y-axis in case of graphs with bands
-        // The main series Y-axis is used, otherwise the
-        // main series and the band-series would be on
-        // different Y-axis
-        for (var idx = 0; idx < overrides.length; ++idx) {
-            var ovr = overrides[idx];
-            if ((this.extraOptions.mainSeries !== undefined) &&
-               (matchSeriesOverride(ovr.alias, this.extraOptions.mainSeries) === true)) {
-                if (ovr.yaxis !== undefined) {
-                    this.yaxis = ovr.yaxis;
-                }
-            }
+      // Fix for Y-axis in case of graphs with bands
+      // The main series Y-axis is used, otherwise the
+      // main series and the band-series would be on
+      // different Y-axis
+      for (var idx = 0; idx < overrides.length; ++idx) {
+        var ovr = overrides[idx];
+        if (
+          this.extraOptions.mainSeries !== undefined &&
+          matchSeriesOverride(ovr.alias, this.extraOptions.mainSeries) === true
+        ) {
+          if (ovr.yaxis !== undefined) {
+            this.yaxis = ovr.yaxis;
+          }
         }
+      }
     }
     // *** END_OF_CHANGE ***
 
@@ -199,7 +206,7 @@ export default class TimeSeries {
         this.fillBelowTo = override.fillBelowTo;
       }
       if (override.color !== void 0) {
-        this.color = override.color;
+        this.setColor(override.color);
       }
       if (override.transform !== void 0) {
         this.transform = override.transform;
@@ -376,5 +383,10 @@ export default class TimeSeries {
     }
 
     return false;
+  }
+
+  setColor(color) {
+    this.color = color;
+    this.bars.fillColor = color;
   }
 }
