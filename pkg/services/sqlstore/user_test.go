@@ -1,6 +1,7 @@
 package sqlstore
 
 import (
+	"context"
 	"fmt"
 	"testing"
 
@@ -21,7 +22,7 @@ func TestUserDataAccess(t *testing.T) {
 				Login: "user_test_login",
 			}
 
-			err := CreateUser(cmd)
+			err := CreateUser(context.Background(), cmd)
 			So(err, ShouldBeNil)
 
 			Convey("Loading a user", func() {
@@ -46,7 +47,7 @@ func TestUserDataAccess(t *testing.T) {
 					Name:  fmt.Sprint("user", i),
 					Login: fmt.Sprint("loginuser", i),
 				}
-				err = CreateUser(cmd)
+				err = CreateUser(context.Background(), cmd)
 				So(err, ShouldBeNil)
 				users = append(users, cmd.Result)
 			}

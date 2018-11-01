@@ -8,8 +8,9 @@ import (
 	"time"
 
 	"github.com/go-xorm/xorm"
+	"github.com/grafana/grafana/pkg/components/securejsondata"
 	"github.com/grafana/grafana/pkg/components/simplejson"
-	"github.com/grafana/grafana/pkg/log"
+	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/services/sqlstore/sqlutil"
 	"github.com/grafana/grafana/pkg/tsdb"
 	. "github.com/smartystreets/goconvey/convey"
@@ -19,8 +20,9 @@ import (
 // The tests require a MSSQL db named grafanatest and a user/password grafana/Password!
 // Use the docker/blocks/mssql_tests/docker-compose.yaml to spin up a
 // preconfigured MSSQL server suitable for running these tests.
-// There is also a dashboard.json in same directory that you can import to Grafana
-// once you've created a datasource for the test server/database.
+// There is also a datasource and dashboard provisioned by devenv scripts that you can
+// use to verify that the generated data are vizualized as expected, see
+// devenv/README.md for setup instructions.
 // If needed, change the variable below to the IP address of the database.
 var serverIP = "localhost"
 
@@ -28,18 +30,30 @@ func TestMSSQL(t *testing.T) {
 	SkipConvey("MSSQL", t, func() {
 		x := InitMSSQLTestDB(t)
 
-		endpoint := &MssqlQueryEndpoint{
-			sqlEngine: &tsdb.DefaultSqlEngine{
-				MacroEngine: NewMssqlMacroEngine(),
-				XormEngine:  x,
-			},
-			log: log.New("tsdb.mssql"),
+		origXormEngine := tsdb.NewXormEngine
+		tsdb.NewXormEngine = func(d, c string) (*xorm.Engine, error) {
+			return x, nil
 		}
 
-		sess := x.NewSession()
-		defer sess.Close()
+		origInterpolate := tsdb.Interpolate
+		tsdb.Interpolate = func(query *tsdb.Query, timeRange *tsdb.TimeRange, sql string) (string, error) {
+			return sql, nil
+		}
 
+		endpoint, err := newMssqlQueryEndpoint(&models.DataSource{
+			JsonData:       simplejson.New(),
+			SecureJsonData: securejsondata.SecureJsonData{},
+		})
+		So(err, ShouldBeNil)
+
+		sess := x.NewSession()
 		fromStart := time.Date(2018, 3, 15, 13, 0, 0, 0, time.UTC).In(time.Local)
+
+		Reset(func() {
+			sess.Close()
+			tsdb.NewXormEngine = origXormEngine
+			tsdb.Interpolate = origInterpolate
+		})
 
 		Convey("Given a table with different native data types", func() {
 			sql := `
@@ -210,11 +224,12 @@ func TestMSSQL(t *testing.T) {
 				So(queryResult.Error, ShouldBeNil)
 
 				points := queryResult.Series[0].Points
-				So(len(points), ShouldEqual, 6)
+				// without fill this should result in 4 buckets
+				So(len(points), ShouldEqual, 4)
 
 				dt := fromStart
 
-				for i := 0; i < 3; i++ {
+				for i := 0; i < 2; i++ {
 					aValue := points[i][0].Float64
 					aTime := time.Unix(int64(points[i][1].Float64)/1000, 0)
 					So(aValue, ShouldEqual, 15)
@@ -222,9 +237,9 @@ func TestMSSQL(t *testing.T) {
 					dt = dt.Add(5 * time.Minute)
 				}
 
-				// adjust for 5 minute gap
-				dt = dt.Add(5 * time.Minute)
-				for i := 3; i < 6; i++ {
+				// adjust for 10 minute gap between first and second set of points
+				dt = dt.Add(10 * time.Minute)
+				for i := 2; i < 4; i++ {
 					aValue := points[i][0].Float64
 					aTime := time.Unix(int64(points[i][1].Float64)/1000, 0)
 					So(aValue, ShouldEqual, 20)
@@ -260,7 +275,7 @@ func TestMSSQL(t *testing.T) {
 
 				dt := fromStart
 
-				for i := 0; i < 3; i++ {
+				for i := 0; i < 2; i++ {
 					aValue := points[i][0].Float64
 					aTime := time.Unix(int64(points[i][1].Float64)/1000, 0)
 					So(aValue, ShouldEqual, 15)
@@ -268,17 +283,56 @@ func TestMSSQL(t *testing.T) {
 					dt = dt.Add(5 * time.Minute)
 				}
 
+				// check for NULL values inserted by fill
+				So(points[2][0].Valid, ShouldBeFalse)
 				So(points[3][0].Valid, ShouldBeFalse)
 
-				// adjust for 5 minute gap
-				dt = dt.Add(5 * time.Minute)
-				for i := 4; i < 7; i++ {
+				// adjust for 10 minute gap between first and second set of points
+				dt = dt.Add(10 * time.Minute)
+				for i := 4; i < 6; i++ {
 					aValue := points[i][0].Float64
 					aTime := time.Unix(int64(points[i][1].Float64)/1000, 0)
 					So(aValue, ShouldEqual, 20)
 					So(aTime, ShouldEqual, dt)
 					dt = dt.Add(5 * time.Minute)
 				}
+
+				So(points[6][0].Valid, ShouldBeFalse)
+
+			})
+
+			Convey("When doing a metric query using timeGroup and $__interval", func() {
+				mockInterpolate := tsdb.Interpolate
+				tsdb.Interpolate = origInterpolate
+
+				Reset(func() {
+					tsdb.Interpolate = mockInterpolate
+				})
+
+				Convey("Should replace $__interval", func() {
+					query := &tsdb.TsdbQuery{
+						Queries: []*tsdb.Query{
+							{
+								DataSource: &models.DataSource{},
+								Model: simplejson.NewFromAny(map[string]interface{}{
+									"rawSql": "SELECT $__timeGroup(time, $__interval) AS time, avg(value) as value FROM metric GROUP BY $__timeGroup(time, $__interval) ORDER BY 1",
+									"format": "time_series",
+								}),
+								RefId: "A",
+							},
+						},
+						TimeRange: &tsdb.TimeRange{
+							From: fmt.Sprintf("%v", fromStart.Unix()*1000),
+							To:   fmt.Sprintf("%v", fromStart.Add(30*time.Minute).Unix()*1000),
+						},
+					}
+
+					resp, err := endpoint.Query(nil, nil, query)
+					So(err, ShouldBeNil)
+					queryResult := resp.Results["A"]
+					So(queryResult.Error, ShouldBeNil)
+					So(queryResult.Meta.Get("sql").MustString(), ShouldEqual, "SELECT FLOOR(DATEDIFF(second, '1970-01-01', time)/60)*60 AS time, avg(value) as value FROM metric GROUP BY FLOOR(DATEDIFF(second, '1970-01-01', time)/60)*60 ORDER BY 1")
+				})
 			})
 
 			Convey("When doing a metric query using timeGroup with float fill enabled", func() {
@@ -596,6 +650,31 @@ func TestMSSQL(t *testing.T) {
 				So(queryResult.Series[1].Name, ShouldEqual, "valueTwo")
 			})
 
+			Convey("When doing a metric query with metric column and multiple value columns", func() {
+				query := &tsdb.TsdbQuery{
+					Queries: []*tsdb.Query{
+						{
+							Model: simplejson.NewFromAny(map[string]interface{}{
+								"rawSql": "SELECT $__timeEpoch(time), measurement, valueOne, valueTwo FROM metric_values ORDER BY 1",
+								"format": "time_series",
+							}),
+							RefId: "A",
+						},
+					},
+				}
+
+				resp, err := endpoint.Query(nil, nil, query)
+				So(err, ShouldBeNil)
+				queryResult := resp.Results["A"]
+				So(queryResult.Error, ShouldBeNil)
+
+				So(len(queryResult.Series), ShouldEqual, 4)
+				So(queryResult.Series[0].Name, ShouldEqual, "Metric A valueOne")
+				So(queryResult.Series[1].Name, ShouldEqual, "Metric A valueTwo")
+				So(queryResult.Series[2].Name, ShouldEqual, "Metric B valueOne")
+				So(queryResult.Series[3].Name, ShouldEqual, "Metric B valueTwo")
+			})
+
 			Convey("Given a stored procedure that takes @from and @to in epoch time", func() {
 				sql := `
 						IF object_id('sp_test_epoch') IS NOT NULL
@@ -621,21 +700,9 @@ func TestMSSQL(t *testing.T) {
 
 							SELECT
 								CAST(ROUND(DATEDIFF(second, '1970-01-01', time)/CAST(@dInterval as float), 0) as bigint)*@dInterval as time,
-								measurement + ' - value one' as metric,
-								avg(valueOne) as value
-							FROM
-								metric_values
-							WHERE
-								time BETWEEN DATEADD(s, @from, '1970-01-01') AND DATEADD(s, @to, '1970-01-01') AND
-								(@metric = 'ALL' OR measurement = @metric)
-							GROUP BY
-								CAST(ROUND(DATEDIFF(second, '1970-01-01', time)/CAST(@dInterval as float), 0) as bigint)*@dInterval,
-								measurement
-							UNION ALL
-							SELECT
-								CAST(ROUND(DATEDIFF(second, '1970-01-01', time)/CAST(@dInterval as float), 0) as bigint)*@dInterval as time,
-								measurement + ' - value two' as metric,
-								avg(valueTwo) as value
+								measurement as metric,
+								avg(valueOne) as valueOne,
+								avg(valueTwo) as valueTwo
 							FROM
 								metric_values
 							WHERE
@@ -678,10 +745,10 @@ func TestMSSQL(t *testing.T) {
 					So(queryResult.Error, ShouldBeNil)
 
 					So(len(queryResult.Series), ShouldEqual, 4)
-					So(queryResult.Series[0].Name, ShouldEqual, "Metric A - value one")
-					So(queryResult.Series[1].Name, ShouldEqual, "Metric B - value one")
-					So(queryResult.Series[2].Name, ShouldEqual, "Metric A - value two")
-					So(queryResult.Series[3].Name, ShouldEqual, "Metric B - value two")
+					So(queryResult.Series[0].Name, ShouldEqual, "Metric A valueOne")
+					So(queryResult.Series[1].Name, ShouldEqual, "Metric A valueTwo")
+					So(queryResult.Series[2].Name, ShouldEqual, "Metric B valueOne")
+					So(queryResult.Series[3].Name, ShouldEqual, "Metric B valueTwo")
 				})
 			})
 
@@ -710,21 +777,9 @@ func TestMSSQL(t *testing.T) {
 
 							SELECT
 								CAST(ROUND(DATEDIFF(second, '1970-01-01', time)/CAST(@dInterval as float), 0) as bigint)*@dInterval as time,
-								measurement + ' - value one' as metric,
-								avg(valueOne) as value
-							FROM
-								metric_values
-							WHERE
-								time BETWEEN @from AND @to AND
-								(@metric = 'ALL' OR measurement = @metric)
-							GROUP BY
-								CAST(ROUND(DATEDIFF(second, '1970-01-01', time)/CAST(@dInterval as float), 0) as bigint)*@dInterval,
-								measurement
-							UNION ALL
-							SELECT
-								CAST(ROUND(DATEDIFF(second, '1970-01-01', time)/CAST(@dInterval as float), 0) as bigint)*@dInterval as time,
-								measurement + ' - value two' as metric,
-								avg(valueTwo) as value
+								measurement as metric,
+								avg(valueOne) as valueOne,
+								avg(valueTwo) as valueTwo
 							FROM
 								metric_values
 							WHERE
@@ -767,10 +822,10 @@ func TestMSSQL(t *testing.T) {
 					So(queryResult.Error, ShouldBeNil)
 
 					So(len(queryResult.Series), ShouldEqual, 4)
-					So(queryResult.Series[0].Name, ShouldEqual, "Metric A - value one")
-					So(queryResult.Series[1].Name, ShouldEqual, "Metric B - value one")
-					So(queryResult.Series[2].Name, ShouldEqual, "Metric A - value two")
-					So(queryResult.Series[3].Name, ShouldEqual, "Metric B - value two")
+					So(queryResult.Series[0].Name, ShouldEqual, "Metric A valueOne")
+					So(queryResult.Series[1].Name, ShouldEqual, "Metric A valueTwo")
+					So(queryResult.Series[2].Name, ShouldEqual, "Metric B valueOne")
+					So(queryResult.Series[3].Name, ShouldEqual, "Metric B valueTwo")
 				})
 			})
 		})

@@ -1,6 +1,7 @@
 package sqlstore
 
 import (
+	"context"
 	"testing"
 	"time"
 
@@ -16,15 +17,16 @@ func TestAccountDataAccess(t *testing.T) {
 
 		Convey("Given single org mode", func() {
 			setting.AutoAssignOrg = true
+			setting.AutoAssignOrgId = 1
 			setting.AutoAssignOrgRole = "Viewer"
 
 			Convey("Users should be added to default organization", func() {
 				ac1cmd := m.CreateUserCommand{Login: "ac1", Email: "ac1@test.com", Name: "ac1 name"}
 				ac2cmd := m.CreateUserCommand{Login: "ac2", Email: "ac2@test.com", Name: "ac2 name"}
 
-				err := CreateUser(&ac1cmd)
+				err := CreateUser(context.Background(), &ac1cmd)
 				So(err, ShouldBeNil)
-				err = CreateUser(&ac2cmd)
+				err = CreateUser(context.Background(), &ac2cmd)
 				So(err, ShouldBeNil)
 
 				q1 := m.GetUserOrgListQuery{UserId: ac1cmd.Result.Id}
@@ -43,8 +45,8 @@ func TestAccountDataAccess(t *testing.T) {
 			ac1cmd := m.CreateUserCommand{Login: "ac1", Email: "ac1@test.com", Name: "ac1 name"}
 			ac2cmd := m.CreateUserCommand{Login: "ac2", Email: "ac2@test.com", Name: "ac2 name", IsAdmin: true}
 
-			err := CreateUser(&ac1cmd)
-			err = CreateUser(&ac2cmd)
+			err := CreateUser(context.Background(), &ac1cmd)
+			err = CreateUser(context.Background(), &ac2cmd)
 			So(err, ShouldBeNil)
 
 			ac1 := ac1cmd.Result
@@ -194,7 +196,7 @@ func TestAccountDataAccess(t *testing.T) {
 
 				Convey("Given an org user with dashboard permissions", func() {
 					ac3cmd := m.CreateUserCommand{Login: "ac3", Email: "ac3@test.com", Name: "ac3 name", IsAdmin: false}
-					err := CreateUser(&ac3cmd)
+					err := CreateUser(context.Background(), &ac3cmd)
 					So(err, ShouldBeNil)
 					ac3 := ac3cmd.Result
 

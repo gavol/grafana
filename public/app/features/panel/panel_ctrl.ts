@@ -44,7 +44,7 @@ export class PanelCtrl {
     this.events = this.panel.events;
     this.timing = {};
 
-    var plugin = config.panels[this.panel.type];
+    const plugin = config.panels[this.panel.type];
     if (plugin) {
       this.pluginId = plugin.id;
       this.pluginName = plugin.name;
@@ -106,7 +106,7 @@ export class PanelCtrl {
     this.editModeInitiated = true;
     this.events.emit('init-edit-mode', null);
 
-    var urlTab = (this.$injector.get('$routeParams').tab || '').toLowerCase();
+    const urlTab = (this.$injector.get('$routeParams').tab || '').toLowerCase();
     if (urlTab) {
       this.editorTabs.forEach((tab, i) => {
         if (tab.title.toLowerCase() === urlTab) {
@@ -118,16 +118,16 @@ export class PanelCtrl {
 
   changeTab(newIndex) {
     this.editorTabIndex = newIndex;
-    var route = this.$injector.get('$route');
+    const route = this.$injector.get('$route');
     route.current.params.tab = this.editorTabs[newIndex].title.toLowerCase();
     route.updateParams();
   }
 
   addEditorTab(title, directiveFn, index?) {
-    var editorTab = { title, directiveFn };
+    const editorTab = { title, directiveFn };
 
     if (_.isString(directiveFn)) {
-      editorTab.directiveFn = function() {
+      editorTab.directiveFn = () => {
         return { templateUrl: directiveFn };
       };
     }
@@ -139,7 +139,7 @@ export class PanelCtrl {
   }
 
   getMenu() {
-    let menu = [];
+    const menu = [];
     menu.push({
       text: 'View',
       click: 'ctrl.viewPanel();',
@@ -167,7 +167,7 @@ export class PanelCtrl {
     // Additional items from sub-class
     menu.push(...this.getAdditionalMenuItems());
 
-    let extendedMenu = this.getExtendedMenu();
+    const extendedMenu = this.getExtendedMenu();
     menu.push({
       text: 'More ...',
       click: '',
@@ -190,7 +190,7 @@ export class PanelCtrl {
   }
 
   getExtendedMenu() {
-    let menu = [];
+    const menu = [];
     if (!this.fullscreen && this.dashboard.meta.canEdit) {
       menu.push({
         text: 'Duplicate',
@@ -226,9 +226,9 @@ export class PanelCtrl {
 
   calculatePanelHeight() {
     if (this.fullscreen) {
-      var docHeight = $(window).height();
-      var editHeight = Math.floor(docHeight * 0.4);
-      var fullscreenHeight = Math.floor(docHeight * 0.8);
+      const docHeight = $(window).height();
+      const editHeight = Math.floor(docHeight * 0.4);
+      const fullscreenHeight = Math.floor(docHeight * 0.8);
       this.containerHeight = this.editMode ? editHeight : fullscreenHeight;
     } else {
       this.containerHeight = this.panel.gridPos.h * GRID_CELL_HEIGHT + (this.panel.gridPos.h - 1) * GRID_CELL_VMARGIN;
@@ -268,7 +268,7 @@ export class PanelCtrl {
   }
 
   editPanelJson() {
-    let editScope = this.$scope.$root.$new();
+    const editScope = this.$scope.$root.$new();
     editScope.object = this.panel.getSaveModel();
     editScope.updateHandler = this.replacePanel.bind(this);
     editScope.enableCopy = true;
@@ -285,12 +285,12 @@ export class PanelCtrl {
   }
 
   replacePanel(newPanel, oldPanel) {
-    let dashboard = this.dashboard;
-    let index = _.findIndex(dashboard.panels, panel => {
+    const dashboard = this.dashboard;
+    const index = _.findIndex(dashboard.panels, panel => {
       return panel.id === oldPanel.id;
     });
 
-    let deletedPanel = dashboard.panels.splice(index, 1);
+    const deletedPanel = dashboard.panels.splice(index, 1);
     this.dashboard.events.emit('panel-removed', deletedPanel);
 
     newPanel = new PanelModel(newPanel);
@@ -302,7 +302,7 @@ export class PanelCtrl {
   }
 
   sharePanel() {
-    var shareScope = this.$scope.$new();
+    const shareScope = this.$scope.$new();
     shareScope.panel = this.panel;
     shareScope.dashboard = this.dashboard;
 
@@ -326,24 +326,24 @@ export class PanelCtrl {
   }
 
   getInfoContent(options) {
-    var markdown = this.panel.description;
+    let markdown = this.panel.description;
 
     if (options.mode === 'tooltip') {
       markdown = this.error || this.panel.description;
     }
 
-    var linkSrv = this.$injector.get('linkSrv');
-    var sanitize = this.$injector.get('$sanitize');
-    var templateSrv = this.$injector.get('templateSrv');
-    var interpolatedMarkdown = templateSrv.replace(markdown, this.panel.scopedVars);
-    var html = '<div class="markdown-html">';
+    const linkSrv = this.$injector.get('linkSrv');
+    const sanitize = this.$injector.get('$sanitize');
+    const templateSrv = this.$injector.get('templateSrv');
+    const interpolatedMarkdown = templateSrv.replace(markdown, this.panel.scopedVars);
+    let html = '<div class="markdown-html">';
 
     html += new Remarkable().render(interpolatedMarkdown);
 
     if (this.panel.links && this.panel.links.length > 0) {
       html += '<ul>';
-      for (let link of this.panel.links) {
-        var info = linkSrv.getPanelLinkAnchorInfo(link, this.panel.scopedVars);
+      for (const link of this.panel.links) {
+        const info = linkSrv.getPanelLinkAnchorInfo(link, this.panel.scopedVars);
         html +=
           '<li><a class="panel-menu-link" href="' +
           info.href +
@@ -361,7 +361,7 @@ export class PanelCtrl {
   }
 
   openInspector() {
-    var modalScope = this.$scope.$new();
+    const modalScope = this.$scope.$new();
     modalScope.panel = this.panel;
     modalScope.dashboard = this.dashboard;
     modalScope.panelInfoHtml = this.getInfoContent({ mode: 'inspector' });
