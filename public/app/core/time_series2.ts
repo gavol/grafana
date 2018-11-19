@@ -133,7 +133,7 @@ export default class TimeSeries {
 
     // *** START_OF_CHANGE ****
     if (this.extraOptions !== undefined) {
-      for (var opt in this.extraOptions) {
+      for (const opt in this.extraOptions) {
         if (this.extraOptions.hasOwnProperty(opt) === true) {
           this[opt] = this.extraOptions[opt];
         }
@@ -143,8 +143,8 @@ export default class TimeSeries {
       // The main series Y-axis is used, otherwise the
       // main series and the band-series would be on
       // different Y-axis
-      for (var idx = 0; idx < overrides.length; ++idx) {
-        var ovr = overrides[idx];
+      for (let idx = 0; idx < overrides.length; ++idx) {
+        const ovr = overrides[idx];
         if (
           this.extraOptions.mainSeries !== undefined &&
           matchSeriesOverride(ovr.alias, this.extraOptions.mainSeries) === true
