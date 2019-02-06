@@ -42,8 +42,7 @@ func (rs *RenderingService) renderViaPhantomJS(ctx context.Context, opts Opts) (
 
 	cmdArgs := []string{
 		"--ignore-ssl-errors=true",
-		"--web-security=true",
-		"--local-url-access=false",
+		"--web-security=false",
 		phantomDebugArg,
 		scriptPath,
 		fmt.Sprintf("url=%v", url),
