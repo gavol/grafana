@@ -127,9 +127,12 @@ Another way is put a webserver like Nginx or Apache in front of Grafana and have
 
 ### protocol
 
-`http` or `https`
+`http`,`https` or `socket`
 
 > **Note** Grafana versions earlier than 3.0 are vulnerable to [POODLE](https://en.wikipedia.org/wiki/POODLE). So we strongly recommend to upgrade to 3.x or use a reverse proxy for ssl termination.
+
+### socket
+Path where the socket should be created when `protocol=socket`. Please make sure that Grafana has appropriate permissions.
 
 ### domain
 
@@ -450,6 +453,12 @@ Ex `filters = sqlstore:debug`
 
 ### enabled
 Enable metrics reporting. defaults true. Available via HTTP API `/metrics`.
+
+### basic_auth_username
+If set configures the username to use for basic authentication on the metrics endpoint.
+
+### basic_auth_password
+If set configures the password to use for basic authentication on the metrics endpoint.
 
 ### interval_seconds
 

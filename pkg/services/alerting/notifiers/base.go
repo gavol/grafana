@@ -6,7 +6,6 @@ import (
 
 	"github.com/grafana/grafana/pkg/log"
 	"github.com/grafana/grafana/pkg/models"
-
 	"github.com/grafana/grafana/pkg/services/alerting"
 )
 
@@ -15,13 +14,14 @@ const (
 )
 
 type NotifierBase struct {
-	Name         string
-	Type         string
-	Id           int64
-	IsDeault     bool
-	UploadImage  bool
-	SendReminder bool
-	Frequency    time.Duration
+	Name                  string
+	Type                  string
+	Id                    int64
+	IsDeault              bool
+	UploadImage           bool
+	SendReminder          bool
+	DisableResolveMessage bool
+	Frequency             time.Duration
 
 	log log.Logger
 }
@@ -34,14 +34,15 @@ func NewNotifierBase(model *models.AlertNotification) NotifierBase {
 	}
 
 	return NotifierBase{
-		Id:           model.Id,
-		Name:         model.Name,
-		IsDeault:     model.IsDefault,
-		Type:         model.Type,
-		UploadImage:  uploadImage,
-		SendReminder: model.SendReminder,
-		Frequency:    model.Frequency,
-		log:          log.New("alerting.notifier." + model.Name),
+		Id:                    model.Id,
+		Name:                  model.Name,
+		IsDeault:              model.IsDefault,
+		Type:                  model.Type,
+		UploadImage:           uploadImage,
+		SendReminder:          model.SendReminder,
+		DisableResolveMessage: model.DisableResolveMessage,
+		Frequency:             model.Frequency,
+		log:                   log.New("alerting.notifier." + model.Name),
 	}
 }
 
@@ -66,6 +67,16 @@ func (n *NotifierBase) ShouldNotify(ctx context.Context, context *alerting.EvalC
 	}
 
 	// Do not notify when we become OK for the first time.
+	if context.PrevAlertState == models.AlertStateUnknown && context.Rule.State == models.AlertStateOK {
+		return false
+	}
+
+	// Do not notify when we become OK for the first time.
+	if context.PrevAlertState == models.AlertStateUnknown && context.Rule.State == models.AlertStatePending {
+		return false
+	}
+
+	// Do not notify when we become OK from pending
 	if context.PrevAlertState == models.AlertStatePending && context.Rule.State == models.AlertStateOK {
 		return false
 	}
@@ -81,6 +92,11 @@ func (n *NotifierBase) ShouldNotify(ctx context.Context, context *alerting.EvalC
 		if lastUpdated.Add(1 * time.Minute).After(time.Now()) {
 			return false
 		}
+	}
+
+	// Do not notify when state is OK if DisableResolveMessage is set to true
+	if context.Rule.State == models.AlertStateOK && n.DisableResolveMessage {
+		return false
 	}
 
 	return true
@@ -104,6 +120,10 @@ func (n *NotifierBase) GetIsDefault() bool {
 
 func (n *NotifierBase) GetSendReminder() bool {
 	return n.SendReminder
+}
+
+func (n *NotifierBase) GetDisableResolveMessage() bool {
+	return n.DisableResolveMessage
 }
 
 func (n *NotifierBase) GetFrequency() time.Duration {

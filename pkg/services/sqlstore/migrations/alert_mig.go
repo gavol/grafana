@@ -71,6 +71,9 @@ func addAlertMigrations(mg *Migrator) {
 	mg.AddMigration("Add column send_reminder", NewAddColumnMigration(alert_notification, &Column{
 		Name: "send_reminder", Type: DB_Bool, Nullable: true, Default: "0",
 	}))
+	mg.AddMigration("Add column disable_resolve_message", NewAddColumnMigration(alert_notification, &Column{
+		Name: "disable_resolve_message", Type: DB_Bool, Nullable: false, Default: "0",
+	}))
 
 	mg.AddMigration("add index alert_notification org_id & name", NewAddIndexMigration(alert_notification, alert_notification.Indices[0]))
 
@@ -130,4 +133,8 @@ func addAlertMigrations(mg *Migrator) {
 	mg.AddMigration("create alert_notification_state table v1", NewAddTableMigration(alert_notification_state))
 	mg.AddMigration("add index alert_notification_state org_id & alert_id & notifier_id",
 		NewAddIndexMigration(alert_notification_state, alert_notification_state.Indices[0]))
+
+	mg.AddMigration("Add for to alert table", NewAddColumnMigration(alertV1, &Column{
+		Name: "for", Type: DB_BigInt, Nullable: true,
+	}))
 }
