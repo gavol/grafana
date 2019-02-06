@@ -1,7 +1,7 @@
 import './graph';
-import './legend';
 import './series_overrides_ctrl';
 import './thresholds_form';
+import './time_regions_form';
 
 import template from './template';
 import _ from 'lodash';
@@ -112,6 +112,7 @@ class GraphCtrl extends MetricsPanelCtrl {
     // other style overrides
     seriesOverrides: [],
     thresholds: [],
+    timeRegions: [],
   };
 
   /** @ngInject */
@@ -147,7 +148,7 @@ class GraphCtrl extends MetricsPanelCtrl {
 
   onInitPanelActions(actions) {
     actions.push({ text: 'Export CSV', click: 'ctrl.exportCsv()' });
-    actions.push({ text: 'Toggle legend', click: 'ctrl.toggleLegend()' });
+    actions.push({ text: 'Toggle legend', click: 'ctrl.toggleLegend()', shortcut: 'p l' });
   }
 
   issueQueries(datasource) {
@@ -156,7 +157,16 @@ class GraphCtrl extends MetricsPanelCtrl {
       panel: this.panel,
       range: this.range,
     });
-    return super.issueQueries(datasource);
+
+    /* Wait for annotationSrv requests to get datasources to
+     * resolve before issuing queries. This allows the annotations
+     * service to fire annotations queries before graph queries
+     * (but not wait for completion). This resolves
+     * issue 11806.
+     */
+    return this.annotationsSrv.datasourcePromises.then(r => {
+      return super.issueQueries(datasource);
+    });
   }
 
   zoomOut(evt) {
@@ -235,91 +245,32 @@ class GraphCtrl extends MetricsPanelCtrl {
     }
   }
 
-  changeSeriesColor(series, color) {
+  onColorChange = (series, color) => {
     series.setColor(color);
     this.panel.aliasColors[series.alias] = series.color;
     this.render();
-  }
+  };
 
-  toggleSeries(serie, event) {
-    if (event.ctrlKey || event.metaKey || event.shiftKey) {
-      if (this.hiddenSeries[serie.alias]) {
-        delete this.hiddenSeries[serie.alias];
-        // *** START_OF_CHANGE ****
-        delete this.hiddenSeries[serie.alias + '_low_DO_NOT_TOUCH'];
-        delete this.hiddenSeries[serie.alias + '_high_DO_NOT_TOUCH'];
-        // *** END_OF_CHANGE ****
-      } else {
-        this.hiddenSeries[serie.alias] = true;
-        // *** START_OF_CHANGE ****
-        this.hiddenSeries[serie.alias + '_low_DO_NOT_TOUCH'] = true;
-        this.hiddenSeries[serie.alias + '_high_DO_NOT_TOUCH'] = true;
-        // *** END_OF_CHANGE ****
-      }
-    } else {
-      this.toggleSeriesExclusiveMode(serie);
-    }
+  onToggleSeries = hiddenSeries => {
+    this.hiddenSeries = hiddenSeries;
     this.render();
-  }
+  };
 
-  toggleSeriesExclusiveMode(serie) {
-    const hidden = this.hiddenSeries;
+  onToggleSort = (sortBy, sortDesc) => {
+    this.panel.legend.sort = sortBy;
+    this.panel.legend.sortDesc = sortDesc;
+    this.render();
+  };
 
-    if (hidden[serie.alias]) {
-      delete hidden[serie.alias];
-      // *** START_OF_CHANGE ****
-      delete hidden[serie.alias + '_low_DO_NOT_TOUCH'];
-      delete hidden[serie.alias + '_high_DO_NOT_TOUCH'];
-      // *** END_OF_CHANGE ****
-    }
-
-    // check if every other series is hidden
-    const alreadyExclusive = _.every(this.seriesList, value => {
-      if (
-        value.alias === serie.alias ||
-        // *** START_OF_CHANGE ****
-        value.alias === serie.alias + '_low_DO_NOT_TOUCH' ||
-        value.alias === serie.alias + '_high_DO_NOT_TOUCH'
-        // *** END_OF_CHANGE ****
-      ) {
-        return true;
-      }
-
-      return hidden[value.alias];
-    });
-
-    if (alreadyExclusive) {
-      // remove all hidden series
-      _.each(this.seriesList, value => {
-        delete this.hiddenSeries[value.alias];
-      });
-    } else {
-      // hide all but this serie
-      _.each(this.seriesList, value => {
-        if (
-          value.alias === serie.alias ||
-          // *** START_OF_CHANGE ****
-          value.alias === serie.alias + '_low_DO_NOT_TOUCH' ||
-          value.alias === serie.alias + '_high_DO_NOT_TOUCH'
-          // *** END_OF_CHANGE ****
-        ) {
-          return;
-        }
-
-        this.hiddenSeries[value.alias] = true;
-      });
-    }
-  }
-
-  toggleAxis(info) {
+  onToggleAxis = info => {
     let override = _.find(this.panel.seriesOverrides, { alias: info.alias });
     if (!override) {
       override = { alias: info.alias };
       this.panel.seriesOverrides.push(override);
     }
-    info.yaxis = override.yaxis = info.yaxis === 2 ? 1 : 2;
+    override.yaxis = info.yaxis;
     this.render();
-  }
+  };
 
   addSeriesOverride(override) {
     this.panel.seriesOverrides.push(override || {});
