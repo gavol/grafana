@@ -9,6 +9,7 @@ export interface PluginExports {
   VariableQueryEditor?: any;
   ExploreQueryField?: any;
   ExploreStartPage?: any;
+  QueryOptionsCtrl?: any;
 
   // Panel plugin
   PanelCtrl?;
