@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry excluding="**/node_modules/*|public/dashboards/|public/app/core/routes/|public/test/mocks/|scripts/webpack/|public/app/plugins/datasource/prometheus/snippets/|public/test/|public/vendor/plugin-css/|**/*.min.js|public/app/plugins/panel/graph/|public/app/plugins/datasource/influxdb/|public/app/features/admin/|public/app/plugins/datasource/graphite/|public/vendor/plugin-text/|public/app/plugins/datasource/elasticsearch/|docker/blocks/graphite1/files/|public/test/core/utils/|public/app/features/panel/|public/vendor/flot/|emails/|public/app/core/components/code_editor/|public/app/features/dashlinks/|public/app/core/utils/|public/app/core/|public/app/|docker/blocks/graphite/files/|public/vendor/angular-ui/|public/vendor/bootstrap/|public/app/plugins/datasource/cloudwatch/|public/app/core/directives/|public/app/plugins/datasource/postgres/|public/app/features/org/|docker/blocks/graphite1/conf/opt/statsd/|public/test/specs/|**/bower_components/*|public/app/plugins/datasource/prometheus/|public/app/features/plugins/|tasks/options/|public/app/features/dashboard/|public/vendor/angular-other/|emails/grunt/|vendor/phantomjs/|public/app/core/controllers/|public/app/core/services/|tests/datasource-test/|scripts/grunt/|public/app/features/panellinks/|public/vendor/d3/|public/app/plugins/datasource/opentsdb/|public/app/features/playlist/|public/app/features/templating/|public/vendor/|public/app/features/|public/vendor/tagsinput/|scripts/grunt/options/" kind="src" path=""/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="docker/blocks/graphite/files"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="docker/blocks/graphite1/conf/opt/statsd"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="docker/blocks/graphite1/files"/>
+	<classpathentry excluding="grunt/|**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="emails"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="emails/grunt"/>
+	<classpathentry excluding="plugins/datasource/influxdb/|**/node_modules/*|core/directives/|plugins/datasource/graphite/|plugins/datasource/elasticsearch/|features/org/|**/bower_components/*|features/panellinks/|core/routes/|plugins/datasource/opentsdb/|core/components/code_editor/|**/*.min.js|features/plugins/|features/templating/|plugins/panel/graph/|features/dashboard/|features/admin/|plugins/datasource/cloudwatch/|core/|core/controllers/|core/services/|plugins/datasource/postgres/|features/|features/panel/|plugins/datasource/prometheus/|features/dashlinks/|core/utils/|features/playlist/|plugins/datasource/prometheus/snippets/" kind="src" path="public/app"/>
+	<classpathentry excluding="directives/|controllers/|services/|utils/|**/bower_components/*|**/node_modules/*|routes/|components/code_editor/|**/*.min.js" kind="src" path="public/app/core"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/core/components/code_editor"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/core/controllers"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/core/directives"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/core/routes"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/core/services"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/core/utils"/>
+	<classpathentry excluding="panel/|admin/|**/bower_components/*|dashlinks/|**/node_modules/*|plugins/|playlist/|templating/|org/|**/*.min.js|dashboard/|panellinks/" kind="src" path="public/app/features"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/features/admin"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/features/dashboard"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/features/dashlinks"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/features/org"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/features/panel"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/features/panellinks"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/features/playlist"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/features/plugins"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/features/templating"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/plugins/datasource/cloudwatch"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/plugins/datasource/elasticsearch"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/plugins/datasource/graphite"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/plugins/datasource/influxdb"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/plugins/datasource/opentsdb"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/plugins/datasource/postgres"/>
+	<classpathentry excluding="**/bower_components/*|snippets/|**/node_modules/*|**/*.min.js" kind="src" path="public/app/plugins/datasource/prometheus"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/plugins/datasource/prometheus/snippets"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/app/plugins/panel/graph"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/dashboards"/>
+	<classpathentry excluding="specs/|**/bower_components/*|**/node_modules/*|**/*.min.js|core/utils/|mocks/" kind="src" path="public/test"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/test/core/utils"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/test/mocks"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/test/specs"/>
+	<classpathentry excluding="d3/|flot/|**/bower_components/*|**/node_modules/*|angular-ui/|plugin-text/|plugin-css/|**/*.min.js|tagsinput/|bootstrap/|angular-other/" kind="src" path="public/vendor"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/vendor/angular-other"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/vendor/angular-ui"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/vendor/bootstrap"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/vendor/d3"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/vendor/flot"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/vendor/plugin-css"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/vendor/plugin-text"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="public/vendor/tagsinput"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|options/|**/*.min.js" kind="src" path="scripts/grunt"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="scripts/grunt/options"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="scripts/webpack"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="tasks/options"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="tests/datasource-test"/>
+	<classpathentry excluding="**/bower_components/*|**/node_modules/*|**/*.min.js" kind="src" path="vendor/phantomjs"/>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path=""/>
+</classpath>

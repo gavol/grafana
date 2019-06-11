@@ -131,7 +131,6 @@ function pluginDirectiveLoader($compile, datasourceSrv, $rootScope, $q, $http, $
           Component: ds.components.QueryOptionsCtrl,
         });
       }
-      //}
       // *** END_OF_CHANGE ***
       // Annotations
       case 'annotations-query-ctrl': {

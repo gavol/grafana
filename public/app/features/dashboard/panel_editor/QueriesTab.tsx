@@ -9,7 +9,9 @@ import { QueryInspector } from './QueryInspector';
 import { QueryOptions } from './QueryOptions';
 import { PanelOptionsGroup } from '@grafana/ui';
 import { QueryEditorRow } from './QueryEditorRow';
+//*** START_OF_CHANGE ***
 import { QueryEditorOptions } from './QueryEditorOptions';
+//*** END_OF_CHANGE ***
 
 // Services
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
@@ -254,6 +256,7 @@ export class QueriesTab extends PureComponent<Props, State> {
               />
             ))}
           </div>
+          {/* *** START_OF_CHANGE *** */}
           <div className="query-editor-options">
             <QueryEditorOptions
               dataSourceValue={panel.targets[0].datasource || panel.datasource}
@@ -268,6 +271,7 @@ export class QueriesTab extends PureComponent<Props, State> {
               inMixedMode={currentDS.meta.mixed}
             />
           </div>
+          {/* *** END_OF_CHANGE *** */}
           <PanelOptionsGroup>
             <QueryOptions panel={panel} datasource={currentDS} />
           </PanelOptionsGroup>
