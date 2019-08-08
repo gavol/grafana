@@ -20,24 +20,24 @@ func initContextWithAuthProxy(store *remotecache.RemoteCache, ctx *m.ReqContext,
 	})
 
 	// Bail if auth proxy is not enabled
-	if auth.IsEnabled() == false {
+	if !auth.IsEnabled() {
 		return false
 	}
 
 	// If the there is no header - we can't move forward
-	if auth.HasHeader() == false {
+	if !auth.HasHeader() {
 		return false
 	}
 
 	// Check if allowed to continue with this IP
-	if result, err := auth.IsAllowedIP(); result == false {
+	if result, err := auth.IsAllowedIP(); !result {
 		ctx.Logger.Error("auth proxy: failed to check whitelisted ip addresses", "message", err.Error(), "error", err.DetailsError)
 		ctx.Handle(407, err.Error(), err.DetailsError)
 		return true
 	}
 
-	// Try to get user id from various sources
-	id, err := auth.GetUserID()
+	// Try to log in user from various providers
+	id, err := auth.Login()
 	if err != nil {
 		ctx.Logger.Error("auth proxy: failed to login", "message", err.Error(), "error", err.DetailsError)
 		ctx.Handle(500, err.Error(), err.DetailsError)

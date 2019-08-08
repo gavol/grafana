@@ -14,6 +14,10 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+const (
+	windows = "windows"
+)
+
 func TestLoadingSettings(t *testing.T) {
 
 	Convey("Testing loading settings from ini file", t, func() {
@@ -91,7 +95,7 @@ func TestLoadingSettings(t *testing.T) {
 		})
 
 		Convey("Should be able to override via command line", func() {
-			if runtime.GOOS == "windows" {
+			if runtime.GOOS == windows {
 				cfg := NewCfg()
 				cfg.Load(&CommandLineArgs{
 					HomePath: "../../",
@@ -125,7 +129,7 @@ func TestLoadingSettings(t *testing.T) {
 		})
 
 		Convey("Defaults can be overridden in specified config file", func() {
-			if runtime.GOOS == "windows" {
+			if runtime.GOOS == windows {
 				cfg := NewCfg()
 				cfg.Load(&CommandLineArgs{
 					HomePath: "../../",
@@ -147,7 +151,7 @@ func TestLoadingSettings(t *testing.T) {
 		})
 
 		Convey("Command line overrides specified config file", func() {
-			if runtime.GOOS == "windows" {
+			if runtime.GOOS == windows {
 				cfg := NewCfg()
 				cfg.Load(&CommandLineArgs{
 					HomePath: "../../",
@@ -169,7 +173,7 @@ func TestLoadingSettings(t *testing.T) {
 		})
 
 		Convey("Can use environment variables in config values", func() {
-			if runtime.GOOS == "windows" {
+			if runtime.GOOS == windows {
 				os.Setenv("GF_DATA_PATH", `c:\tmp\env_override`)
 				cfg := NewCfg()
 				cfg.Load(&CommandLineArgs{

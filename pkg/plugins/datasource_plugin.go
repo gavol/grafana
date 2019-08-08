@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/grafana/grafana-plugin-model/go/datasource"
-	"github.com/grafana/grafana/pkg/log"
+	"github.com/grafana/grafana/pkg/infra/log"
 	"github.com/grafana/grafana/pkg/models"
 	"github.com/grafana/grafana/pkg/plugins/datasource/wrapper"
 	"github.com/grafana/grafana/pkg/tsdb"
@@ -29,6 +29,7 @@ type DataSourcePlugin struct {
 	BuiltIn       bool              `json:"builtIn,omitempty"`
 	Mixed         bool              `json:"mixed,omitempty"`
 	Routes        []*AppPluginRoute `json:"routes"`
+	Streaming     bool              `json:"streaming"`
 
 	Backend    bool   `json:"backend,omitempty"`
 	Executable string `json:"executable,omitempty"`

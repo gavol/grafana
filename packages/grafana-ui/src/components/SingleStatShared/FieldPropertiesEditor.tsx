@@ -7,20 +7,16 @@ import { FormLabel } from '../FormLabel/FormLabel';
 import { UnitPicker } from '../UnitPicker/UnitPicker';
 
 // Types
-import { Field } from '../../types/data';
-import { toIntegerOrUndefined } from '../../utils';
-import { SelectOptionItem } from '../Select/Select';
+import { toIntegerOrUndefined, Field, SelectableValue } from '@grafana/data';
 
 import { VAR_SERIES_NAME, VAR_FIELD_NAME, VAR_CALC, VAR_CELL_PREFIX } from '../../utils/fieldDisplay';
-import { PanelOptionsGroup } from '../index';
 
 const labelWidth = 6;
 
 export interface Props {
-  title: string;
-  value: Partial<Field>;
-  onChange: (fieldProperties: Partial<Field>) => void;
   showMinMax: boolean;
+  value: Partial<Field>;
+  onChange: (value: Partial<Field>, event?: React.SyntheticEvent<HTMLElement>) => void;
 }
 
 export const FieldPropertiesEditor: React.FC<Props> = ({ value, onChange, showMinMax }) => {
@@ -57,7 +53,7 @@ export const FieldPropertiesEditor: React.FC<Props> = ({ value, onChange, showMi
     [value.max, onChange]
   );
 
-  const onUnitChange = (unit: SelectOptionItem<string>) => {
+  const onUnitChange = (unit: SelectableValue<string>) => {
     onChange({ ...value, unit: unit.value });
   };
 
@@ -81,8 +77,9 @@ export const FieldPropertiesEditor: React.FC<Props> = ({ value, onChange, showMi
       {'$' + VAR_CELL_PREFIX + '{N}'} / {'$' + VAR_CALC}
     </div>
   );
+
   return (
-    <PanelOptionsGroup title="Field">
+    <>
       <FormField
         label="Title"
         labelWidth={labelWidth}
@@ -91,6 +88,7 @@ export const FieldPropertiesEditor: React.FC<Props> = ({ value, onChange, showMi
         tooltip={titleTooltip}
         placeholder="Auto"
       />
+
       <div className="gf-form">
         <FormLabel width={labelWidth}>Unit</FormLabel>
         <UnitPicker defaultValue={unit} onChange={onUnitChange} />
@@ -124,6 +122,6 @@ export const FieldPropertiesEditor: React.FC<Props> = ({ value, onChange, showMi
         value={decimals}
         type="number"
       />
-    </PanelOptionsGroup>
+    </>
   );
 };

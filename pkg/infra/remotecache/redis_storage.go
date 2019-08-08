@@ -22,8 +22,12 @@ func parseRedisConnStr(connStr string) (*redis.Options, error) {
 	keyValueCSV := strings.Split(connStr, ",")
 	options := &redis.Options{Network: "tcp"}
 	for _, rawKeyValue := range keyValueCSV {
-		keyValueTuple := strings.Split(rawKeyValue, "=")
+		keyValueTuple := strings.SplitN(rawKeyValue, "=", 2)
 		if len(keyValueTuple) != 2 {
+			if strings.HasPrefix(rawKeyValue, "password") {
+				// don't log the password
+				rawKeyValue = "password******"
+			}
 			return nil, fmt.Errorf("incorrect redis connection string format detected for '%v', format is key=value,key=value", rawKeyValue)
 		}
 		connKey := keyValueTuple[0]
@@ -81,16 +85,10 @@ func (s *redisStorage) Get(key string) (interface{}, error) {
 	if err == nil {
 		return item.Val, nil
 	}
-
 	if err.Error() == "EOF" {
 		return nil, ErrCacheItemNotFound
 	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	return item.Val, nil
+	return nil, err
 }
 
 // Delete delete a key from session.
