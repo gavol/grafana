@@ -219,7 +219,6 @@ export interface LoadExploreDataSourcesPayload {
 
 export interface RunQueriesPayload {
   exploreId: ExploreId;
-  range: TimeRange;
 }
 
 export interface ResetQueryErrorPayload {

@@ -21,6 +21,7 @@ export class DataProcessor {
     }
 
     for (const series of dataList) {
+      console.log('Series: ' + series);
       const { fields } = series;
       const cache = new FieldCache(fields);
       const time = cache.getFirstFieldOfType(FieldType.time);
@@ -69,6 +70,7 @@ export class DataProcessor {
   }
 
   private toTimeSeries(field: Field, alias: string, datapoints: any[][], index: number, range?: TimeRange) {
+    console.log('Field: ' + field);
     const colorIndex = index % colors.length;
     const color = this.panel.aliasColors[alias] || colors[colorIndex];
 
