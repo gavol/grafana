@@ -42,7 +42,9 @@ export class PanelQueryState {
   streams: DataStreamState[] = [];
 
   sendSeries = false;
-  sendLegacy = false;
+  // *** START_OF_CHANGE ***
+  sendLegacy = true;
+  // *** END_OF_CHANGE ***
 
   // A promise for the running query
   private executor?: Promise<PanelData> = null;

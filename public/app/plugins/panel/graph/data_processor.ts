@@ -21,7 +21,6 @@ export class DataProcessor {
     }
 
     for (const series of dataList) {
-      console.log('Series: ' + series);
       const { fields } = series;
       const cache = new FieldCache(fields);
       const time = cache.getFirstFieldOfType(FieldType.time);
@@ -53,7 +52,10 @@ export class DataProcessor {
           datapoints.push([row[i], row[time.index]]);
         }
 
-        list.push(this.toTimeSeries(field, name, datapoints, list.length, range));
+        // *** START_OF_CHANGE ***
+        const opt = series.hasOwnProperty('options') === false ? undefined : series.options;
+        list.push(this.toTimeSeries(field, name, datapoints, list.length, range, opt));
+        // *** END_OF_CHANGE ***
       }
     }
 
@@ -69,8 +71,9 @@ export class DataProcessor {
     return list;
   }
 
-  private toTimeSeries(field: Field, alias: string, datapoints: any[][], index: number, range?: TimeRange) {
-    console.log('Field: ' + field);
+  // *** START_OF_CHANGE ***
+  private toTimeSeries(field: Field, alias: string, datapoints: any[][], index: number, range?: TimeRange, opt?: any) {
+    // *** END_OF_CHANGE ***
     const colorIndex = index % colors.length;
     const color = this.panel.aliasColors[alias] || colors[colorIndex];
 
@@ -79,6 +82,9 @@ export class DataProcessor {
       alias: alias,
       color: getColorFromHexRgbOrName(color, config.theme.type),
       unit: field.unit,
+      // *** START_OF_CHANGE ***
+      extraOptions: opt,
+      // *** START_OF_CHANGE ***
     });
 
     if (datapoints && datapoints.length > 0 && range) {

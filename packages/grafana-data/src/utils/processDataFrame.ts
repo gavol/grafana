@@ -41,6 +41,9 @@ function convertTimeSeriesToDataFrame(timeSeries: TimeSeries): DataFrame {
     labels: timeSeries.tags,
     refId: timeSeries.refId,
     meta: timeSeries.meta,
+    // *** START_OF_CHANGE ***
+    options: timeSeries.options,
+    // *** END_OF_CHANGE ***
   };
 }
 

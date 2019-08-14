@@ -77,6 +77,17 @@ export class QueriesTab extends PureComponent<Props, State> {
   // Updates the response with information from the stream
   panelDataObserver = {
     next: (data: PanelData) => {
+      // *** START_OF_CHANGE ***
+      if (data.hasOwnProperty('legacy') === true) {
+        for (let l = 0; l < data.legacy.length; ++l) {
+          const legacyObj = data.legacy[l];
+          if (legacyObj.hasOwnProperty('options') === true) {
+            data.series[l].options = legacyObj.options;
+          }
+        }
+      }
+      // *** END_OF_CHANGE ***
+
       const { panel } = this.props;
       if (data.state === LoadingState.Error) {
         panel.events.emit('data-error', data.error);
