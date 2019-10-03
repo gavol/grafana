@@ -36,13 +36,34 @@ func (stub *TestMultiLDAP) Login(query *models.LoginUserQuery) (
 
 func (stub *TestMultiLDAP) User(login string) (
 	*models.ExternalUserInfo,
+	ldap.ServerConfig,
 	error,
 ) {
 	stub.userCalled = true
 	result := &models.ExternalUserInfo{
 		UserId: stub.ID,
 	}
-	return result, nil
+	return result, ldap.ServerConfig{}, nil
+}
+
+func prepareMiddleware(t *testing.T, req *http.Request, store *remotecache.RemoteCache) *AuthProxy {
+	t.Helper()
+
+	ctx := &models.ReqContext{
+		Context: &macaron.Context{
+			Req: macaron.Request{
+				Request: req,
+			},
+		},
+	}
+
+	auth := New(&Options{
+		Store: store,
+		Ctx:   ctx,
+		OrgID: 4,
+	})
+
+	return auth
 }
 
 func prepareMiddleware(t *testing.T, req *http.Request, store *remotecache.RemoteCache) *AuthProxy {

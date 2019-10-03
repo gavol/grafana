@@ -18,7 +18,8 @@ import {
 import { GRID_COLUMN_COUNT } from 'app/core/constants';
 import { auto } from 'angular';
 import { TemplateSrv } from '../templating/template_srv';
-import { LinkSrv } from './panellinks/link_srv';
+import { PanelPluginMeta } from '@grafana/ui/src/types/panel';
+import { getPanelLinksSupplier } from './panellinks/linkSuppliers';
 
 export class PanelCtrl {
   panel: any;
@@ -33,9 +34,6 @@ export class PanelCtrl {
   $timeout: any;
   inspector: any;
   editModeInitiated: boolean;
-  //*** START_OF_CHANGE ****
-  editorHelpIndex: number;
-  //*** END_OF_CHANGE ***
   height: any;
   containerHeight: any;
   events: Emitter;
@@ -122,7 +120,7 @@ export class PanelCtrl {
     }
   }
 
-  getMenu() {
+  async getMenu() {
     const menu = [];
     menu.push({
       text: 'View',
@@ -149,7 +147,7 @@ export class PanelCtrl {
     });
 
     // Additional items from sub-class
-    menu.push(...this.getAdditionalMenuItems());
+    menu.push(...(await this.getAdditionalMenuItems()));
 
     const extendedMenu = this.getExtendedMenu();
     menu.push({
@@ -200,7 +198,7 @@ export class PanelCtrl {
   }
 
   // Override in sub-class to add items before extended menu
-  getAdditionalMenuItems(): any[] {
+  async getAdditionalMenuItems(): Promise<any[]> {
     return [];
   }
 
@@ -216,16 +214,6 @@ export class PanelCtrl {
   render(payload?: any) {
     this.events.emit('render', payload);
   }
-
-  // *** START_OF_CHANGE ****
-  toggleEditorHelp(index) {
-    if (this.editorHelpIndex === index) {
-      this.editorHelpIndex = null;
-      return;
-    }
-    this.editorHelpIndex = index;
-  }
-  // *** END_OF_CHANGE ***
 
   duplicate() {
     duplicatePanel(this.dashboard, this.panel);
@@ -261,37 +249,42 @@ export class PanelCtrl {
   }
 
   getInfoContent(options: { mode: string }) {
-    let markdown = this.panel.description || '';
+    const { panel } = this;
+    let markdown = panel.description || '';
 
     if (options.mode === 'tooltip') {
-      markdown = this.error || this.panel.description || '';
+      markdown = this.error || panel.description || '';
     }
 
-    const linkSrv: LinkSrv = this.$injector.get('linkSrv');
     const templateSrv: TemplateSrv = this.$injector.get('templateSrv');
-    const interpolatedMarkdown = templateSrv.replace(markdown, this.panel.scopedVars);
+    const interpolatedMarkdown = templateSrv.replace(markdown, panel.scopedVars);
     let html = '<div class="markdown-html panel-info-content">';
 
     const md = renderMarkdown(interpolatedMarkdown);
     html += config.disableSanitizeHtml ? md : sanitize(md);
 
-    if (this.panel.links && this.panel.links.length > 0) {
+    if (panel.links && panel.links.length > 0) {
+      const interpolatedLinks = getPanelLinksSupplier(panel).getLinks();
+
       html += '<ul class="panel-info-corner-links">';
-      for (const link of this.panel.links) {
-        const info = linkSrv.getDataLinkUIModel(link, this.panel.scopedVars);
+      for (const link of interpolatedLinks) {
         html +=
           '<li><a class="panel-menu-link" href="' +
-          escapeHtml(info.href) +
+          escapeHtml(link.href) +
           '" target="' +
-          escapeHtml(info.target) +
+          escapeHtml(link.target) +
           '">' +
-          escapeHtml(info.title) +
+          escapeHtml(link.title) +
           '</a></li>';
       }
       html += '</ul>';
     }
 
     html += '</div>';
+
     return html;
   }
+
+  // overriden from react
+  onPluginTypeChange = (plugin: PanelPluginMeta) => {};
 }
