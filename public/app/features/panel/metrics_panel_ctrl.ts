@@ -142,6 +142,7 @@ class MetricsPanelCtrl extends PanelCtrl {
       }
 
       if (this.useDataFrames) {
+        // *** START_OF_CHANGE ***
         if (data.hasOwnProperty('legacy') === true) {
           for (let l = 0; l < data.legacy.length; ++l) {
             const legacyObj = data.legacy[l];

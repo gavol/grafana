@@ -66,26 +66,6 @@ func prepareMiddleware(t *testing.T, req *http.Request, store *remotecache.Remot
 	return auth
 }
 
-func prepareMiddleware(t *testing.T, req *http.Request, store *remotecache.RemoteCache) *AuthProxy {
-	t.Helper()
-
-	ctx := &models.ReqContext{
-		Context: &macaron.Context{
-			Req: macaron.Request{
-				Request: req,
-			},
-		},
-	}
-
-	auth := New(&Options{
-		Store: store,
-		Ctx:   ctx,
-		OrgID: 4,
-	})
-
-	return auth
-}
-
 func TestMiddlewareContext(t *testing.T) {
 	Convey("auth_proxy helper", t, func() {
 		req, _ := http.NewRequest("POST", "http://example.com", nil)
