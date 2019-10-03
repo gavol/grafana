@@ -17,6 +17,10 @@ import {
   PluginState,
 } from '@grafana/ui';
 import { QueryEditorRow } from './QueryEditorRow';
+//*** START_OF_CHANGE ***
+import { QueryEditorOptions } from './QueryEditorOptions';
+//*** END_OF_CHANGE ***
+
 // Services
 import { getDatasourceSrv } from 'app/features/plugins/datasource_srv';
 import { getBackendSrv } from 'app/core/services/backend_srv';
@@ -80,6 +84,17 @@ export class QueriesTab extends PureComponent<Props, State> {
   }
 
   onPanelDataUpdate(data: PanelData) {
+    // *** START_OF_CHANGE ***
+    if (data.hasOwnProperty('legacy') === true) {
+      for (let l = 0; l < data.legacy.length; ++l) {
+        const legacyObj = data.legacy[l];
+        if (legacyObj.hasOwnProperty('options') === true) {
+          data.series[l].options = legacyObj.options;
+        }
+      }
+    }
+    // *** END_OF_CHANGE ***
+
     this.setState({ data });
   }
 
@@ -264,6 +279,23 @@ export class QueriesTab extends PureComponent<Props, State> {
                   />
                 ))}
               </div>
+              {/* *** START_OF_CHANGE *** */}
+              <div className="query-editor-options">
+                <QueryEditorOptions
+                  dataSourceValue={panel.targets[0].datasource || panel.datasource}
+                  key={panel.targets[0].refId}
+                  panel={panel}
+                  dashboard={dashboard}
+                  data={data}
+                  query={panel.targets[0]}
+                  onChange={query => this.onQueryChange(query, 0)}
+                  onRemoveQuery={this.onRemoveQuery}
+                  onAddQuery={this.onAddQuery}
+                  onMoveQuery={this.onMoveQuery}
+                  inMixedMode={currentDS.meta.mixed}
+                />
+              </div>
+              {/* *** END_OF_CHANGE *** */}
               <PanelOptionsGroup>
                 <QueryOptions panel={panel} datasource={currentDS} />
               </PanelOptionsGroup>
