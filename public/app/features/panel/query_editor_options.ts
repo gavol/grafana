@@ -17,7 +17,7 @@ export class QueryEditorOptionsCtrl {
   $timeout: any;
   inspector: any;
 
-  constructor($scope, $injector) {
+  constructor($scope: any, $injector: any) {
     this.$injector = $injector;
     this.$location = $injector.get('$location');
     this.$scope = $scope;

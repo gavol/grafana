@@ -46,7 +46,7 @@ export class DataProcessor {
         }
 
         // *** START_OF_CHANGE ***
-        const opt = series.hasOwnProperty('options') === false ? undefined : series.options;
+        const opt = series.hasOwnProperty('meta') === false ? undefined : series.meta;
         list.push(this.toTimeSeries(field, name, i, j, datapoints, list.length, range, opt));
         // *** END_OF_CHANGE ***
       }
@@ -75,8 +75,8 @@ export class DataProcessor {
     index: number,
     range?: TimeRange,
     opt?: any
-  ) // *** END_OF_CHANGE ***
-  {
+  ) {
+    // *** END_OF_CHANGE ***
     const colorIndex = index % colors.length;
     const color = this.panel.aliasColors[alias] || colors[colorIndex];
 

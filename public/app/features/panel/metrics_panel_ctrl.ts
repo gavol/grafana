@@ -142,17 +142,6 @@ class MetricsPanelCtrl extends PanelCtrl {
       }
 
       if (this.useDataFrames) {
-        // *** START_OF_CHANGE ***
-        if (data.hasOwnProperty('legacy') === true) {
-          for (let l = 0; l < data.legacy.length; ++l) {
-            const legacyObj = data.legacy[l];
-            if (legacyObj.hasOwnProperty('options') === true) {
-              data.series[l].options = legacyObj.options;
-            }
-          }
-        }
-        // *** END_OF_CHANGE ***
-
         this.handleDataFrames(data.series);
       } else {
         // Make the results look as if they came directly from a <6.2 datasource request

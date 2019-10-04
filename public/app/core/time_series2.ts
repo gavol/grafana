@@ -107,6 +107,7 @@ export default class TimeSeries {
   flotpairs: any;
   unit: any;
   // *** START_OF_CHANGE ***
+  [key: string]: any;
   extraOptions: any;
   // *** END_OF_CHANGE ***
 

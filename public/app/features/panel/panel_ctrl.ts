@@ -219,7 +219,7 @@ export class PanelCtrl {
   }
 
   // *** START_OF_CHANGE ****
-  toggleEditorHelp(index) {
+  toggleEditorHelp(index: any) {
     if (this.editorHelpIndex === index) {
       this.editorHelpIndex = null;
       return;

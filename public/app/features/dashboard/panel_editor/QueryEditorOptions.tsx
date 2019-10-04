@@ -253,6 +253,8 @@ export function filterPanelDataToQuery(data: PanelData, refId: string): PanelDat
   const request: DataQueryRequest = undefined;
   // TODO: look in sub-requets to match the info
 
+  const timeRange = data.timeRange;
+
   // Only say this is an error if the error links to the query
   let state = LoadingState.Done;
   const error = data.error && data.error.refId === refId ? data.error : undefined;
@@ -265,5 +267,6 @@ export function filterPanelDataToQuery(data: PanelData, refId: string): PanelDat
     series,
     request,
     error,
+    timeRange,
   };
 }

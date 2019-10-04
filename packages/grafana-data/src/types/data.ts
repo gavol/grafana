@@ -31,10 +31,6 @@ export interface QueryResultBase {
    * Used by some backend datasources to communicate back info about the execution (generated sql, timing)
    */
   meta?: QueryResultMeta;
-
-  // *** START_OF_CHANGE ***
-  options?: any;
-  // *** END_OF_CHANGE ***
 }
 
 export interface Labels {

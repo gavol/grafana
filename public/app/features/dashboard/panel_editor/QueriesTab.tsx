@@ -84,17 +84,6 @@ export class QueriesTab extends PureComponent<Props, State> {
   }
 
   onPanelDataUpdate(data: PanelData) {
-    // *** START_OF_CHANGE ***
-    if (data.hasOwnProperty('legacy') === true) {
-      for (let l = 0; l < data.legacy.length; ++l) {
-        const legacyObj = data.legacy[l];
-        if (legacyObj.hasOwnProperty('options') === true) {
-          data.series[l].options = legacyObj.options;
-        }
-      }
-    }
-    // *** END_OF_CHANGE ***
-
     this.setState({ data });
   }
 
