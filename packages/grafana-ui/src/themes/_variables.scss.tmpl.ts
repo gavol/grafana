@@ -1,6 +1,6 @@
 /* tslint:disable:max-line-length */
 
-import { GrafanaThemeCommons } from '../types';
+import { GrafanaThemeCommons } from '@grafana/data';
 import { renderGeneratedFileBanner } from '../utils/generatedFileBanner';
 
 export const commonThemeVarsTemplate = (theme: GrafanaThemeCommons) =>
@@ -176,7 +176,7 @@ $zindex-typeahead: ${theme.zIndex.typeahead};
 //
 
 $btn-padding-x: 14px !default;
-$btn-padding-y: 10px !default;
+$btn-padding-y: 8px !default;
 $btn-line-height: 1 !default;
 $btn-font-weight: ${theme.typography.weight.semibold} !default;
 
