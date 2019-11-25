@@ -10,6 +10,9 @@ import { DataQuery, PanelData, DataSourceSelectItem } from '@grafana/data';
 import { DashboardModel } from '../state/DashboardModel';
 import { QueryEditorRow } from './QueryEditorRow';
 import { addQuery } from 'app/core/utils/query';
+//*** START_OF_CHANGE ***
+import { QueryEditorOptions } from './QueryEditorOptions';
+//*** END_OF_CHANGE ***
 
 interface Props {
   // The query configuration
@@ -74,23 +77,46 @@ export class QueryEditorRows extends PureComponent<Props> {
   render() {
     const { props } = this;
     return (
-      <div className="query-editor-rows">
-        {props.queries.map((query, index) => (
-          <QueryEditorRow
-            dataSourceValue={query.datasource || props.datasource.value}
-            key={query.refId}
+      /* *** START_OF_CHANGE *** */
+      <>
+        {/* *** END_OF_CHANGE *** */}
+        <div className="query-editor-rows">
+          {props.queries.map((query, index) => (
+            <QueryEditorRow
+              dataSourceValue={query.datasource || props.datasource.value}
+              key={query.refId}
+              panel={props.panel}
+              dashboard={props.dashboard}
+              data={props.data}
+              query={query}
+              onChange={query => this.onChangeQuery(query, index)}
+              onRemoveQuery={this.onRemoveQuery}
+              onAddQuery={this.onAddQuery}
+              onMoveQuery={this.onMoveQuery}
+              inMixedMode={props.datasource.meta.mixed}
+            />
+          ))}
+        </div>
+        {/* *** START_OF_CHANGE *** */}
+        <div className="query-editor-options">
+          <QueryEditorOptions
+            dataSourceValue={props.panel.targets[0].datasource || props.panel.datasource}
+            key={props.panel.targets[0].refId}
             panel={props.panel}
             dashboard={props.dashboard}
             data={props.data}
-            query={query}
-            onChange={query => this.onChangeQuery(query, index)}
+            query={props.panel.targets[0]}
+            onChange={query => this.onChangeQuery(query, 0)}
             onRemoveQuery={this.onRemoveQuery}
             onAddQuery={this.onAddQuery}
             onMoveQuery={this.onMoveQuery}
             inMixedMode={props.datasource.meta.mixed}
           />
-        ))}
-      </div>
+        </div>
+        {/* *** END_OF_CHANGE *** */}
+        {/* *** START_OF_CHANGE *** */}
+      </>
+      /* *** END_OF_CHANGE *** */
     );
   }
 }
