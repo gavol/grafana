@@ -124,23 +124,6 @@ function pluginDirectiveLoader(
           Component: ds.components.QueryCtrl,
         });
       }
-      // *** START_OF_CHANGE ****
-      // QueryOptionsCtrl
-      case 'query-options-ctrl': {
-        const ds = scope.ctrl.datasource;
-        return $q.when({
-          baseUrl: ds.meta.baseUrl,
-          name: 'query-options-ctrl-' + ds.meta.id,
-          bindings: { target: '=', panelCtrl: '=', datasource: '=' },
-          attrs: {
-            target: 'ctrl.target',
-            'panel-ctrl': 'ctrl',
-            datasource: 'ctrl.datasource',
-          },
-          Component: ds.components.QueryOptionsCtrl,
-        });
-      }
-      // *** END_OF_CHANGE ***
       // Annotations
       case 'annotations-query-ctrl': {
         const baseUrl = scope.ctrl.currentDatasource.meta.baseUrl;

@@ -330,7 +330,6 @@ export interface ExploreQueryFieldProps<
 > extends QueryEditorProps<DSType, TQuery, TOptions> {
   history: any[];
   onBlur?: () => void;
-
   absoluteRange?: AbsoluteTimeRange;
 }
 
