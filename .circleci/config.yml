@@ -125,7 +125,7 @@ jobs:
                 - node_modules
           - run:
               name: run end-to-end tests
-              command: 'env BASE_URL=http://127.0.0.1:3000 yarn e2e-tests:ci'
+              command: 'env BASE_URL=http://127.0.0.1:3000 yarn e2e-tests'
               no_output_timeout: 5m
           - store_artifacts:
                 path: public/e2e-tests/screenShots/theTruth
@@ -167,7 +167,7 @@ jobs:
                 - node_modules
           - run:
               name: run end-to-end tests
-              command: 'env BASE_URL=http://127.0.0.1:3000 yarn e2e-tests:ci'
+              command: 'env BASE_URL=http://127.0.0.1:3000 yarn e2e-tests'
               no_output_timeout: 5m
           - store_artifacts:
                 path: public/e2e-tests/screenShots/theTruth
@@ -419,6 +419,12 @@ jobs:
       - run:
           name: build grafana frontend
           command: './scripts/build/build.sh --fast --frontend-only'
+      - run:
+          name: es-check install
+          command: 'yarn global add es-check'
+      - run:
+          name: es-check run
+          command: 'es-check es5 ./public/build/*.js'
       - save_cache:
           key: frontend-dependency-cache-{{ checksum "yarn.lock" }}
           paths:
