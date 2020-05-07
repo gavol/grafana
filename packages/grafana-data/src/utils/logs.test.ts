@@ -48,15 +48,6 @@ describe('getLogLevelFromKey()', () => {
   });
 });
 
-describe('getLogLevelFromKey()', () => {
-  it('returns correct log level', () => {
-    expect(getLogLevelFromKey('info')).toBe(LogLevel.info);
-  });
-  it('returns correct log level when level is capitalized', () => {
-    expect(getLogLevelFromKey('INFO')).toBe(LogLevel.info);
-  });
-});
-
 describe('calculateLogsLabelStats()', () => {
   test('should return no stats for empty rows', () => {
     expect(calculateLogsLabelStats([], '')).toEqual([]);
