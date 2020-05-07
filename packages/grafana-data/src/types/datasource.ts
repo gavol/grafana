@@ -325,6 +325,11 @@ export enum DataSourceStatus {
   Disconnected,
 }
 
+export enum ExploreMode {
+  Logs = 'Logs',
+  Metrics = 'Metrics',
+}
+
 export interface ExploreQueryFieldProps<
   DSType extends DataSourceApi<TQuery, TOptions>,
   TQuery extends DataQuery = DataQuery,
@@ -333,11 +338,12 @@ export interface ExploreQueryFieldProps<
   history: any[];
   onBlur?: () => void;
   absoluteRange?: AbsoluteTimeRange;
+  exploreMode?: ExploreMode;
 }
 
 export interface ExploreStartPageProps {
   datasource?: DataSourceApi;
-  exploreMode: 'Logs' | 'Metrics';
+  exploreMode: ExploreMode;
   onClickExample: (query: DataQuery) => void;
 }
 
@@ -397,6 +403,11 @@ export interface DataQuery {
   datasource?: string | null;
 
   metric?: any;
+
+  /**
+   * For limiting result lines.
+   */
+  maxLines?: number;
 }
 
 export interface DataQueryError {
@@ -427,13 +438,17 @@ export interface DataQueryRequest<TQuery extends DataQuery = DataQuery> {
   app: CoreApp | string;
 
   cacheTimeout?: string;
-  exploreMode?: 'Logs' | 'Metrics';
+  exploreMode?: ExploreMode;
   rangeRaw?: RawTimeRange;
   timeInfo?: string; // The query time description (blue text in the upper right)
 
   // Request Timing
   startTime: number;
   endTime?: number;
+}
+
+export interface DataQueryTimings {
+  dataProcessingTime: number;
 }
 
 export interface QueryFix {
@@ -508,9 +523,9 @@ export interface DataSourceInstanceSettings<T extends DataSourceJsonData = DataS
 
   /**
    * This is the full Authorization header if basic auth is ennabled.
-   * Only available here when access is Browser (direct), when acess is Server (proxy)
+   * Only available here when access is Browser (direct), when access is Server (proxy)
    * The basic auth header, username & password is never exposted to browser/Frontend
-   * so this will be emtpy then.
+   * so this will be empty then.
    */
   basicAuth?: string;
   withCredentials?: boolean;
