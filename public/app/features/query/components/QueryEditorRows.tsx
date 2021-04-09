@@ -98,21 +98,19 @@ export class QueryEditorRows extends PureComponent<Props> {
                 </div>
                 {/* *** START_OF_CHANGE *** */}
                 <div className="query-editor-options">
-                  {queries.map((query, index) => (
-                    <QueryEditorOptions
-                      dsSettings={dsSettings}
-                      id={query.refId}
-                      index={index}
-                      key={query.refId}
-                      data={data}
-                      query={query}
-                      onChange={(query) => this.onChangeQuery(query, index)}
-                      onRemoveQuery={this.onRemoveQuery}
-                      onAddQuery={this.props.onAddQuery}
-                      onRunQuery={this.props.onRunQueries}
-                      queries={queries}
-                    />
-                  ))}
+                  <QueryEditorOptions
+                    dsSettings={dsSettings}
+                    id={queries[0].refId}
+                    index={0}
+                    key={queries[0].refId}
+                    data={data}
+                    query={queries[0]}
+                    onChange={(query) => this.onChangeQuery(queries[0], 0)}
+                    onRemoveQuery={this.onRemoveQuery}
+                    onAddQuery={this.props.onAddQuery}
+                    onRunQuery={this.props.onRunQueries}
+                    queries={queries}
+                  />
                 </div>
                 {/* *** END_OF_CHANGE *** */}
                 {/* *** START_OF_CHANGE *** */}
