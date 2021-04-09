@@ -24,6 +24,9 @@ export class PanelCtrl {
   $location: any;
   $timeout: any;
   editModeInitiated: boolean;
+  //*** START_OF_CHANGE ****
+  editorHelpIndex: null | number;
+  //*** END_OF_CHANGE ***
   height: number;
   width: number;
   containerHeight: any;
@@ -108,6 +111,16 @@ export class PanelCtrl {
   render(payload?: any) {
     this.events.emit(PanelEvents.render, payload);
   }
+
+  // *** START_OF_CHANGE ****
+  toggleEditorHelp(index: any) {
+    if (this.editorHelpIndex === index) {
+      this.editorHelpIndex = null;
+      return;
+    }
+    this.editorHelpIndex = index;
+  }
+  // *** END_OF_CHANGE ***
 
   // overriden from react
   onPluginTypeChange = (plugin: PanelPluginMeta) => {};
