@@ -109,6 +109,15 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
     });
   };
 
+  onToggleBarChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { onChange, options } = this.props;
+    let errorBar = event.target.value === 'true' ? true : false;
+    onChange({
+      ...options,
+      errorBar,
+    });
+  };
+
   onCacheTimeoutBlur = (event: ChangeEvent<HTMLInputElement>) => {
     const { options, onChange } = this.props;
     onChange({
@@ -144,6 +153,168 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
       });
     }
   };
+
+  onRefStringBlur = (event: ChangeEvent<HTMLInputElement>) => {
+    const { options, onChange } = this.props;
+    let refString = event.target.value;
+    onChange({
+      ...options,
+      refString,
+    });
+  };
+
+  onBeforeBlur = (event: ChangeEvent<HTMLInputElement>) => {
+    const { options, onChange } = this.props;
+    let beforeInterval = event.target.value;
+    onChange({
+      ...options,
+      beforeInterval,
+    });
+  };
+
+  onAfterBlur = (event: ChangeEvent<HTMLInputElement>) => {
+    const { options, onChange } = this.props;
+    let afterInterval = event.target.value;
+    onChange({
+      ...options,
+      afterInterval,
+    });
+  };
+
+  onFillGapBlur = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { options, onChange } = this.props;
+    let fillGap = emptyToNull(event.target.value);
+    onChange({
+      ...options,
+      fillGap,
+    });
+  };
+
+  renderFillGapOption() {
+    const { dataSource, options } = this.props; //, options } = this.props;
+
+    const tooltip = `The default value is Near`;
+    let fillGap = options.fillGap ?? 'near';
+
+    if (!dataSource.meta.queryOptions?.fillGap) {
+      return null;
+    }
+
+    return (
+      <div className="gf-form-inline">
+        <div className="gf-form">
+          <InlineFormLabel width={9} tooltip={tooltip}>
+            Fill Gaps
+          </InlineFormLabel>
+          <select value={fillGap} className="width-6" onChange={this.onFillGapBlur}>
+            <option value="near">Near</option>
+            <option value="all">All</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+      </div>
+    );
+  }
+
+  renderErrorBarOption() {
+    const { dataSource, options } = this.props;
+
+    let errorBar = options.errorBar === true ? 'true' : 'false';
+
+    if (!dataSource.meta.queryOptions?.errorBar) {
+      return null;
+    }
+
+    return (
+      <div className="gf-form">
+        <InlineFormLabel width={9} tooltip={<>Enable/Disable Error Bars</>}>
+          Error Bar
+        </InlineFormLabel>
+        <select value={errorBar} className="width-6" onChange={this.onToggleBarChange}>
+          <option value="true">Show</option>
+          <option value="false">Hide</option>
+        </select>
+      </div>
+    );
+  }
+
+  renderRefStringOption() {
+    const { dataSource, options } = this.props;
+
+    let refString = options.refString ?? '';
+
+    if (!dataSource.meta.queryOptions?.refString) {
+      return null;
+    }
+
+    return (
+      <div className="gf-form">
+        <InlineFormLabel width={9} tooltip={<>The default value is empty</>}>
+          Reference String
+        </InlineFormLabel>
+        <Input
+          type="text"
+          className="width-6"
+          placeholder=""
+          spellCheck={false}
+          onBlur={this.onRefStringBlur}
+          defaultValue={refString}
+        />
+      </div>
+    );
+  }
+
+  renderBeforeIntervalOption() {
+    const { dataSource, options } = this.props;
+
+    let beforeInterval = options.beforeInterval ?? '60';
+
+    if (!dataSource.meta.queryOptions?.beforeInterval) {
+      return null;
+    }
+
+    return (
+      <div className="gf-form">
+        <InlineFormLabel width={12} tooltip={<>The default value is 60 seconds</>}>
+          Lookup before time interval
+        </InlineFormLabel>
+        <Input
+          type="text"
+          className="width-6"
+          placeholder="60"
+          spellCheck={false}
+          onBlur={this.onBeforeBlur}
+          defaultValue={beforeInterval}
+        />
+      </div>
+    );
+  }
+
+  renderAfterIntervalOption() {
+    const { dataSource, options } = this.props;
+
+    let afterInterval = options.afterInterval ?? '60';
+
+    if (!dataSource.meta.queryOptions?.afterInterval) {
+      return null;
+    }
+
+    return (
+      <div className="gf-form">
+        <InlineFormLabel width={12} tooltip={<>The default value is 60 seconds</>}>
+          Lookup after time interval
+        </InlineFormLabel>
+        <Input
+          type="text"
+          className="width-6"
+          placeholder="60"
+          spellCheck={false}
+          onBlur={this.onAfterBlur}
+          defaultValue={afterInterval}
+        />
+      </div>
+    );
+  }
 
   renderCacheTimeoutOption() {
     const { dataSource, options } = this.props;
@@ -214,36 +385,13 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
   }
 
   renderIntervalOption() {
-    const { data, dataSource, options } = this.props;
+    //const { data, dataSource, options } = this.props;
+    const { data } = this.props;
     const realInterval = data.request?.interval;
-    const minIntervalOnDs = dataSource.interval ?? 'No limit';
+    //const minIntervalOnDs = dataSource.interval ?? 'No limit';
 
     return (
       <>
-        <div className="gf-form-inline">
-          <div className="gf-form">
-            <InlineFormLabel
-              width={9}
-              tooltip={
-                <>
-                  A lower limit for the interval. Recommended to be set to write frequency, for example <code>1m</code>{' '}
-                  if your data is written every minute. Default value can be set in data source settings for most data
-                  sources.
-                </>
-              }
-            >
-              Min interval
-            </InlineFormLabel>
-            <Input
-              type="text"
-              className="width-6"
-              placeholder={`${minIntervalOnDs}`}
-              spellCheck={false}
-              onBlur={this.onMinIntervalBlur}
-              defaultValue={options.minInterval ?? ''}
-            />
-          </div>
-        </div>
         <div className="gf-form-inline">
           <div className="gf-form">
             <InlineFormLabel
@@ -318,6 +466,11 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
         {this.renderMaxDataPointsOption()}
         {this.renderIntervalOption()}
         {this.renderCacheTimeoutOption()}
+        {this.renderRefStringOption()}
+        {this.renderErrorBarOption()}
+        {this.renderFillGapOption()}
+        {this.renderBeforeIntervalOption()}
+        {this.renderAfterIntervalOption()}
 
         <div className="gf-form">
           <InlineFormLabel width={9}>Relative time</InlineFormLabel>

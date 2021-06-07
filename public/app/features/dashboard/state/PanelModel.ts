@@ -92,6 +92,12 @@ const mustKeepProps: { [str: string]: boolean } = {
   hasRefreshed: true,
   events: true,
   cacheTimeout: true,
+  fillGap: true,
+  maxSelect: true,
+  refString: true,
+  errorBar: true,
+  beforeInterval: true,
+  afterInterval: true,
   cachedPluginOptions: true,
   transparent: true,
   pluginVersion: true,
@@ -166,6 +172,12 @@ export class PanelModel implements DataConfigSource {
   hasRefreshed: boolean;
   events: EventBus;
   cacheTimeout?: any;
+  fillGap?: any;
+  maxSelect?: boolean;
+  refString?: string | null;
+  errorBar?: boolean;
+  beforeInterval?: string | null;
+  afterInterval?: string | null;
   cachedPluginOptions: Record<string, PanelOptionsCache>;
   legend?: { show: boolean; sort?: string; sortDesc?: boolean };
   plugin?: PanelPlugin;
@@ -417,6 +429,13 @@ export class PanelModel implements DataConfigSource {
     this.hideTimeOverride = options.timeRange?.hide;
     this.interval = options.minInterval;
     this.maxDataPoints = options.maxDataPoints;
+    this.fillGap = options.fillGap;
+    this.cacheTimeout = options.cacheTimeout;
+    this.maxSelect = options.maxSelect;
+    this.refString = options.refString;
+    this.errorBar = options.errorBar;
+    this.beforeInterval = options.beforeInterval;
+    this.afterInterval = options.afterInterval;
     this.targets = options.queries;
     this.hasChanged = true;
 

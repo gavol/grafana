@@ -140,8 +140,14 @@ export interface DataSourcePluginMeta<T extends KeyValue = {}> extends PluginMet
 
 interface PluginMetaQueryOptions {
   cacheTimeout?: boolean;
+  fillGap?: boolean;
   maxDataPoints?: boolean;
   minInterval?: boolean;
+  maxSelect?: boolean;
+  refString?: boolean;
+  errorBar?: boolean;
+  beforeInterval?: boolean;
+  afterInterval?: boolean;
 }
 
 export interface DataSourcePluginComponents<
@@ -500,6 +506,12 @@ export interface DataQueryRequest<TQuery extends DataQuery = DataQuery> {
   app: CoreApp | string;
 
   cacheTimeout?: string;
+  fillGap?: string;
+  maxSelect?: boolean;
+  refString?: string;
+  errorBar?: boolean;
+  beforeInterval?: string;
+  afterInterval?: string;
   exploreMode?: ExploreMode;
   rangeRaw?: RawTimeRange;
   timeInfo?: string; // The query time description (blue text in the upper right)

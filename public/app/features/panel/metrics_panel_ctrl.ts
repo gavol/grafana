@@ -203,6 +203,12 @@ class MetricsPanelCtrl extends PanelCtrl {
       minInterval: panel.interval,
       scopedVars: panel.scopedVars,
       cacheTimeout: panel.cacheTimeout,
+      fillGap: panel.fillGap,
+      maxSelect: panel.maxSelect || true,
+      refString: panel.refString || '',
+      errorBar: panel.errorBar || false,
+      beforeInterval: panel.beforeInterval || '60',
+      afterInterval: panel.afterInterval || '60',
       transformations: panel.transformations,
     });
   }

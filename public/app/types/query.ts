@@ -6,7 +6,13 @@ export interface QueryGroupOptions {
   dataSource: QueryGroupDataSource;
   maxDataPoints?: number | null;
   minInterval?: string | null;
+  fillGap?: string | null;
   cacheTimeout?: string | null;
+  maxSelect?: boolean;
+  refString?: string | null;
+  errorBar?: boolean;
+  beforeInterval?: string | null;
+  afterInterval?: string | null;
   timeRange?: {
     from?: string | null;
     shift?: string | null;
