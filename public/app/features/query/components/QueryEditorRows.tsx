@@ -5,9 +5,6 @@ import React, { PureComponent } from 'react';
 import { DataQuery, DataSourceInstanceSettings, PanelData } from '@grafana/data';
 import { QueryEditorRow } from './QueryEditorRow';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
-//*** START_OF_CHANGE ***
-import { QueryEditorOptions } from './QueryEditorOptions';
-//*** END_OF_CHANGE ***
 
 interface Props {
   // The query configuration
@@ -75,47 +72,24 @@ export class QueryEditorRows extends PureComponent<Props> {
         <Droppable droppableId="transformations-list" direction="vertical">
           {(provided) => {
             return (
-              /* *** START_OF_CHANGE *** */
-              <>
-                {/* *** END_OF_CHANGE *** */}
-                <div ref={provided.innerRef} {...provided.droppableProps}>
-                  {queries.map((query, index) => (
-                    <QueryEditorRow
-                      dsSettings={dsSettings}
-                      id={query.refId}
-                      index={index}
-                      key={query.refId}
-                      data={data}
-                      query={query}
-                      onChange={(query) => this.onChangeQuery(query, index)}
-                      onRemoveQuery={this.onRemoveQuery}
-                      onAddQuery={this.props.onAddQuery}
-                      onRunQuery={this.props.onRunQueries}
-                      queries={queries}
-                    />
-                  ))}
-                  {provided.placeholder}
-                </div>
-                {/* *** START_OF_CHANGE *** */}
-                <div className="query-editor-options">
-                  <QueryEditorOptions
+              <div ref={provided.innerRef} {...provided.droppableProps}>
+                {queries.map((query, index) => (
+                  <QueryEditorRow
                     dsSettings={dsSettings}
-                    id={queries[0].refId}
-                    index={0}
-                    key={queries[0].refId}
+                    id={query.refId}
+                    index={index}
+                    key={query.refId}
                     data={data}
-                    query={queries[0]}
-                    onChange={(query) => this.onChangeQuery(queries[0], 0)}
+                    query={query}
+                    onChange={(query) => this.onChangeQuery(query, index)}
                     onRemoveQuery={this.onRemoveQuery}
                     onAddQuery={this.props.onAddQuery}
                     onRunQuery={this.props.onRunQueries}
                     queries={queries}
                   />
-                </div>
-                {/* *** END_OF_CHANGE *** */}
-                {/* *** START_OF_CHANGE *** */}
-              </>
-              /* *** END_OF_CHANGE *** */
+                ))}
+                {provided.placeholder}
+              </div>
             );
           }}
         </Droppable>

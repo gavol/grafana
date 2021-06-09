@@ -1,7 +1,4 @@
 import angular from 'angular';
-//*** START_OF_CHANGE ***
-import { GlobeCtrl } from 'app/plugins/globe';
-//*** END_OF_CHANGE ***
 
 const module = angular.module('grafana.directives');
 
@@ -16,9 +13,7 @@ export class QueryRowCtrl {
     this.panelCtrl = this.queryCtrl.panelCtrl;
     this.target = this.queryCtrl.target;
     this.panel = this.panelCtrl.panel;
-    //*** START_OF_CHANGE ***
-    GlobeCtrl.prototype.changeGlobe(this.queryCtrl);
-    //*** END_OF_CHANGE ***
+
     if (this.hasTextEditMode && this.queryCtrl.toggleEditorMode) {
       // expose this function to react parent component
       this.panelCtrl.toggleEditorMode = this.queryCtrl.toggleEditorMode.bind(this.queryCtrl);
