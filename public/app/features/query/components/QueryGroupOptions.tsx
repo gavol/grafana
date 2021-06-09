@@ -131,8 +131,8 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
 
     let maxDataPoints: number | null = parseInt(event.target.value as string, 10);
 
-    if (isNaN(maxDataPoints) || maxDataPoints === 0) {
-      maxDataPoints = null;
+    if (isNaN(maxDataPoints) || maxDataPoints === null) {
+      maxDataPoints = 100;
     }
 
     if (maxDataPoints !== options.maxDataPoints) {
@@ -348,8 +348,12 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
   renderMaxDataPointsOption() {
     const { data, options } = this.props;
     const realMd = data.request?.maxDataPoints;
-    const value = options.maxDataPoints ?? '';
-    const isAuto = value === '';
+    let value = options.maxDataPoints ?? '';
+    if (value === '') {
+      options.maxDataPoints = 100;
+    }
+
+    const isAuto = value === 0;
 
     return (
       <div className="gf-form-inline">
