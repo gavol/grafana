@@ -199,7 +199,7 @@ class MetricsPanelCtrl extends PanelCtrl {
       timezone: this.dashboard.getTimezone(),
       timeInfo: this.timeInfo,
       timeRange: this.range,
-      maxDataPoints: panel.maxDataPoints || this.width,
+      maxDataPoints: panel.maxDataPoints === 0 ? this.width : panel.maxDataPoints || 100, //this.width,
       minInterval: panel.interval,
       scopedVars: panel.scopedVars,
       cacheTimeout: panel.cacheTimeout,
