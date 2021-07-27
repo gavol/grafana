@@ -41,6 +41,8 @@ export interface QueryRunnerOptions<
   timeInfo?: string; // String description of time range for display
   maxDataPoints: number;
   minInterval: string | undefined | null;
+  maxPBeast?: number;
+  intervalPBeast?: string | undefined;
   scopedVars?: ScopedVars;
   cacheTimeout?: string;
   fillGap?: string;
@@ -145,6 +147,8 @@ export class PanelQueryRunner {
       maxDataPoints,
       scopedVars,
       minInterval,
+      maxPBeast,
+      intervalPBeast,
     } = options;
 
     if (isSharedDashboardQuery(datasource)) {
@@ -161,9 +165,11 @@ export class PanelQueryRunner {
       range: timeRange,
       timeInfo,
       interval: '',
+      intervalPBeast: intervalPBeast,
       intervalMs: 0,
       targets: cloneDeep(queries),
       maxDataPoints: maxDataPoints,
+      maxPBeast: maxPBeast,
       scopedVars: scopedVars || {},
       cacheTimeout,
       fillGap: fillGap,

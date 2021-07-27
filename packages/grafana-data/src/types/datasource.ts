@@ -133,6 +133,8 @@ interface PluginMetaQueryOptions {
   fillGap?: boolean;
   maxDataPoints?: boolean;
   minInterval?: boolean;
+  maxPBeast?: boolean;
+  intervalPBeast?: boolean;
   maxSelect?: boolean;
   refString?: boolean;
   errorBar?: boolean;
@@ -485,6 +487,8 @@ export interface DataQueryRequest<TQuery extends DataQuery = DataQuery> {
   interval: string;
   intervalMs: number;
   maxDataPoints?: number;
+  intervalPBeast?: string;
+  maxPBeast?: number;
   range: TimeRange;
   reverse?: boolean;
   scopedVars: ScopedVars;

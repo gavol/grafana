@@ -27,6 +27,8 @@ export class PanelEditorQueries extends PureComponent<Props, State> {
       queries: panel.targets,
       maxDataPoints: panel.maxDataPoints,
       minInterval: panel.interval,
+      maxPBeast: panel.maxPBeast,
+      intervalPBeast: panel.intervalPBeast,
       cacheTimeout: panel.cacheTimeout,
       fillGap: panel.fillGap,
       maxSelect: panel.maxSelect,

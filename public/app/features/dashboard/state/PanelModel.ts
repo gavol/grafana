@@ -107,6 +107,8 @@ const mustKeepProps: { [str: string]: boolean } = {
   editSourceId: true,
   maxDataPoints: true,
   interval: true,
+  maxPBeast: true,
+  intervalPBeast: true,
   replaceVariables: true,
   libraryPanel: true,
   getDisplayTitle: true,
@@ -171,6 +173,8 @@ export class PanelModel implements DataConfigSource {
 
   hasRefreshed: boolean;
   events: EventBus;
+  maxPBeast?: number | null;
+  intervalPBeast?: string | null;
   cacheTimeout?: any;
   fillGap?: any;
   maxSelect?: boolean;
@@ -429,6 +433,8 @@ export class PanelModel implements DataConfigSource {
     this.hideTimeOverride = options.timeRange?.hide;
     this.interval = options.minInterval;
     this.maxDataPoints = options.maxDataPoints;
+    this.intervalPBeast = options.intervalPBeast;
+    this.maxPBeast = options.maxPBeast;
     this.fillGap = options.fillGap;
     this.cacheTimeout = options.cacheTimeout;
     this.maxSelect = options.maxSelect;
