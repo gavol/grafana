@@ -50,8 +50,6 @@ export class DataProcessor {
           datapoints.push([field.values.get(r), dateTime(timeField.values.get(r)).valueOf()]);
         }
 
-        list.push(this.toTimeSeries(field, name, i, j, datapoints, list.length, range));
-
         // *** START_OF_CHANGE ***
         const opt = series.hasOwnProperty('meta') === false ? undefined : series.meta;
         list.push(this.toTimeSeries(field, name, i, j, datapoints, list.length, range, opt));
