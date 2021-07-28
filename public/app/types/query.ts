@@ -5,11 +5,11 @@ export interface QueryGroupOptions {
   queries: Array<DataQuery | ExpressionQuery>;
   dataSource: QueryGroupDataSource;
   maxDataPoints?: number | null;
+  minInterval?: string | null;
+  cacheTimeout?: string | null;
   intervalPBeast?: string | null;
   maxPBeast?: number | null;
-  minInterval?: string | null;
   fillGap?: string | null;
-  cacheTimeout?: string | null;
   maxSelect?: boolean;
   refString?: string | null;
   errorBar?: boolean;

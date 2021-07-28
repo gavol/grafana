@@ -98,6 +98,8 @@ const mustKeepProps: { [str: string]: boolean } = {
   errorBar: true,
   beforeInterval: true,
   afterInterval: true,
+  maxPBeast: true,
+  intervalPBeast: true,
   cachedPluginOptions: true,
   transparent: true,
   pluginVersion: true,
@@ -107,8 +109,6 @@ const mustKeepProps: { [str: string]: boolean } = {
   editSourceId: true,
   maxDataPoints: true,
   interval: true,
-  maxPBeast: true,
-  intervalPBeast: true,
   replaceVariables: true,
   libraryPanel: true,
   getDisplayTitle: true,
@@ -173,9 +173,9 @@ export class PanelModel implements DataConfigSource {
 
   hasRefreshed: boolean;
   events: EventBus;
+  cacheTimeout?: any;
   maxPBeast?: number | null;
   intervalPBeast?: string | null;
-  cacheTimeout?: any;
   fillGap?: any;
   maxSelect?: boolean;
   refString?: string | null;

@@ -109,6 +109,42 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
     });
   };
 
+  onCacheTimeoutBlur = (event: ChangeEvent<HTMLInputElement>) => {
+    const { options, onChange } = this.props;
+    onChange({
+      ...options,
+      cacheTimeout: emptyToNull(event.target.value),
+    });
+  };
+
+  onMaxDataPointsBlur = (event: ChangeEvent<HTMLInputElement>) => {
+    const { options, onChange } = this.props;
+
+    let maxDataPoints: number | null = parseInt(event.target.value as string, 10);
+
+    if (isNaN(maxDataPoints) || maxDataPoints === 0) {
+      maxDataPoints = null;
+    }
+
+    if (maxDataPoints !== options.maxDataPoints) {
+      onChange({
+        ...options,
+        maxDataPoints,
+      });
+    }
+  };
+
+  onMinIntervalBlur = (event: ChangeEvent<HTMLInputElement>) => {
+    const { options, onChange } = this.props;
+    const minInterval = emptyToNull(event.target.value);
+    if (minInterval !== options.minInterval) {
+      onChange({
+        ...options,
+        minInterval,
+      });
+    }
+  };
+
   onToggleBarChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const { onChange, options } = this.props;
     let errorBar = event.target.value === 'true' ? true : false;
@@ -136,31 +172,6 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
     });
   };
 
-  onCacheTimeoutBlur = (event: ChangeEvent<HTMLInputElement>) => {
-    const { options, onChange } = this.props;
-    onChange({
-      ...options,
-      cacheTimeout: emptyToNull(event.target.value),
-    });
-  };
-
-  onMaxDataPointsBlur = (event: ChangeEvent<HTMLInputElement>) => {
-    const { options, onChange } = this.props;
-
-    let maxDataPoints: number | null = parseInt(event.target.value as string, 10);
-
-    if (isNaN(maxDataPoints) || maxDataPoints === 0) {
-      maxDataPoints = null;
-    }
-
-    if (maxDataPoints !== options.maxDataPoints) {
-      onChange({
-        ...options,
-        maxDataPoints,
-      });
-    }
-  };
-
   onMaxPBeastBlur = (event: any) => {
     const { options, onChange } = this.props;
 
@@ -174,17 +185,6 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
       onChange({
         ...options,
         maxPBeast,
-      });
-    }
-  };
-
-  onMinIntervalBlur = (event: ChangeEvent<HTMLInputElement>) => {
-    const { options, onChange } = this.props;
-    const minInterval = emptyToNull(event.target.value);
-    if (minInterval !== options.minInterval) {
-      onChange({
-        ...options,
-        minInterval,
       });
     }
   };
@@ -434,54 +434,6 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
     );
   }
 
-  renderMaxPBeastOption() {
-    const { data, dataSource, options } = this.props;
-    if (!dataSource.meta.queryOptions?.maxPBeast) {
-      return null;
-    }
-    const realMd = data.request?.maxPBeast;
-    let value = options.maxPBeast ?? '';
-    if (value === '' || value === undefined) {
-      options.maxPBeast = 100;
-    }
-
-    const isAuto1 = value === 0;
-    let test = options.maxSelect ?? true;
-
-    return (
-      <div className="gf-form-inline">
-        <div className="gf-form">
-          <Checkbox label="PBeast__points" checked={test} onChange={this.onMaxSelectChange} />
-          <InlineFormLabel
-            width={2}
-            tooltip={
-              <>
-                The maximum data points per series. Used directly by some data sources and used in calculation of auto
-                interval. With streaming data this value is used for the rolling buffer.
-              </>
-            }
-          >
-            {` `}
-          </InlineFormLabel>
-          <Input
-            type="number"
-            className="width-6"
-            placeholder={`${realMd}`}
-            spellCheck={false}
-            onBlur={this.onMaxPBeastBlur}
-            defaultValue={value}
-          />
-          {isAuto1 && (
-            <>
-              <div className="gf-form-label query-segment-operator">=</div>
-              <div className="gf-form-label">Width of panel</div>
-            </>
-          )}
-        </div>
-      </div>
-    );
-  }
-
   renderIntervalOption() {
     const { data, dataSource, options } = this.props;
     const realInterval = data.request?.interval;
@@ -536,6 +488,54 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
           </div>
         </div>
       </>
+    );
+  }
+
+  renderMaxPBeastOption() {
+    const { data, dataSource, options } = this.props;
+    if (!dataSource.meta.queryOptions?.maxPBeast) {
+      return null;
+    }
+    const realMd = data.request?.maxPBeast;
+    let value = options.maxPBeast ?? '';
+    if (value === '' || value === undefined) {
+      options.maxPBeast = 100;
+    }
+
+    const isAuto1 = value === 0;
+    let test = options.maxSelect ?? true;
+
+    return (
+      <div className="gf-form-inline">
+        <div className="gf-form">
+          <Checkbox label="PBeast__points" checked={test} onChange={this.onMaxSelectChange} />
+          <InlineFormLabel
+            width={2}
+            tooltip={
+              <>
+                The maximum data points per series. Used directly by some data sources and used in calculation of auto
+                interval. With streaming data this value is used for the rolling buffer.
+              </>
+            }
+          >
+            {` `}
+          </InlineFormLabel>
+          <Input
+            type="number"
+            className="width-6"
+            placeholder={`${realMd}`}
+            spellCheck={false}
+            onBlur={this.onMaxPBeastBlur}
+            defaultValue={value}
+          />
+          {isAuto1 && (
+            <>
+              <div className="gf-form-label query-segment-operator">=</div>
+              <div className="gf-form-label">Width of panel</div>
+            </>
+          )}
+        </div>
+      </div>
     );
   }
 

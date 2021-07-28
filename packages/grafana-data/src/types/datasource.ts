@@ -130,9 +130,9 @@ export interface DataSourcePluginMeta<T extends KeyValue = {}> extends PluginMet
 
 interface PluginMetaQueryOptions {
   cacheTimeout?: boolean;
-  fillGap?: boolean;
   maxDataPoints?: boolean;
   minInterval?: boolean;
+  fillGap?: boolean;
   maxPBeast?: boolean;
   intervalPBeast?: boolean;
   maxSelect?: boolean;
@@ -487,8 +487,6 @@ export interface DataQueryRequest<TQuery extends DataQuery = DataQuery> {
   interval: string;
   intervalMs: number;
   maxDataPoints?: number;
-  intervalPBeast?: string;
-  maxPBeast?: number;
   range: TimeRange;
   reverse?: boolean;
   scopedVars: ScopedVars;
@@ -497,6 +495,8 @@ export interface DataQueryRequest<TQuery extends DataQuery = DataQuery> {
   app: CoreApp | string;
 
   cacheTimeout?: string;
+  intervalPBeast?: string;
+  maxPBeast?: number;
   fillGap?: string;
   maxSelect?: boolean;
   refString?: string;
