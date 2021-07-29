@@ -134,6 +134,14 @@ interface PluginMetaQueryOptions {
   cacheTimeout?: boolean;
   maxDataPoints?: boolean;
   minInterval?: boolean;
+  fillGap?: boolean;
+  maxPBeast?: boolean;
+  intervalPBeast?: boolean;
+  maxSelect?: boolean;
+  refString?: boolean;
+  errorBar?: boolean;
+  beforeInterval?: boolean;
+  afterInterval?: boolean;
 }
 
 export interface DataSourcePluginComponents<
@@ -496,6 +504,14 @@ export interface DataQueryRequest<TQuery extends DataQuery = DataQuery> {
   app: CoreApp | string;
 
   cacheTimeout?: string;
+  intervalPBeast?: string;
+  maxPBeast?: number;
+  fillGap?: string;
+  maxSelect?: boolean;
+  refString?: string;
+  errorBar?: boolean;
+  beforeInterval?: string;
+  afterInterval?: string;
   rangeRaw?: RawTimeRange;
   timeInfo?: string; // The query time description (blue text in the upper right)
   panelId?: number;

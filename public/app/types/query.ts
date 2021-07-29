@@ -7,6 +7,14 @@ export interface QueryGroupOptions {
   maxDataPoints?: number | null;
   minInterval?: string | null;
   cacheTimeout?: string | null;
+  intervalPBeast?: string | null;
+  maxPBeast?: number | null;
+  fillGap?: string | null;
+  maxSelect?: boolean;
+  refString?: string | null;
+  errorBar?: boolean;
+  beforeInterval?: string | null;
+  afterInterval?: string | null;
   timeRange?: {
     from?: string | null;
     shift?: string | null;
