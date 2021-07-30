@@ -21,6 +21,57 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
   onChangeTimeRange,
   replaceVariables,
 }) => {
+  //*** START_OF_CHANGE ****
+  let allSeries = data.series;
+  let mainSeries = {};
+
+  // Check the properties of the "main" series
+  for(let i = 0; i < allSeries.length; ++i) {
+      let s = allSeries[i];
+      // The "main" series have no "meta" attribute
+      if(s.meta === undefined || s.hasOwnProperty("meta") === false) {
+          let sName = s.name;
+          for(let j = 0; j < s.fields.length; ++j) {
+              let f = s.fields[j];
+              if(f.name === "Value") {
+                  mainSeries[sName] = {
+                      viz: undefined,
+                      axisPlacement: undefined,
+                  };
+                  // The "low" and "high" series must have the same visibility and Y-axis of the
+                  // corresponding main series
+                  mainSeries[sName]['viz'] = f.config.custom.hideFrom['viz'];
+                  mainSeries[sName]['axisPlacement'] = f.config.custom.['axisPlacement'];
+              }
+          }
+      }
+  }
+
+  // Loop over the "not-main" series in order to add the "meta" attributes 
+  for(let i = 0; i < allSeries.length; ++i) {
+      let s = allSeries[i];
+      if(s.meta !== undefined && s.hasOwnProperty("meta") === true) {
+          let extraOpts = s.meta.v2;
+          for(let j = 0; j < s.fields.length; ++j) {
+              let f = s.fields[j];
+              if(f.name === "Value") {
+                  for(let opt in extraOpts) {
+                      if(extraOpts.hasOwnProperty(opt) === true) {
+                          f.config.custom[opt] = extraOpts[opt];
+                      }
+                  }
+                  let ms = extraOpts.mainSeries;
+                  let v = mainSeries[ms];
+                  if(v !== undefined) {
+                      f.config.custom.hideFrom.viz = v['viz'];
+                      f.config.custom.axisPlacement = v['axisPlacement'];
+                  }
+              }
+          }
+      }
+  }
+  //*** END_OF_CHANGE ****
+
   const { sync } = usePanelContext();
 
   const getFieldLinks = (field: Field, rowIndex: number) => {

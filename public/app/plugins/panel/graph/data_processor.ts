@@ -51,7 +51,7 @@ export class DataProcessor {
         }
 
         // *** START_OF_CHANGE ***
-        const opt = series.hasOwnProperty('meta') === false ? undefined : series.meta;
+        const opt = (series.hasOwnProperty('meta') === false || series.meta === undefined) ? undefined : series.meta.v1;
         list.push(this.toTimeSeries(field, name, i, j, datapoints, list.length, range, opt));
         // *** END_OF_CHANGE ***
       }
