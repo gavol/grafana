@@ -40,8 +40,6 @@ The table below compares what each role can do. Read the sections below for more
 
 If you are running Grafana Enterprise, you can grant and revoke access by using fine-grained roles and permissions, refer to [Fine-grained access Control]({{< relref "../enterprise/access-control/_index.md" >}}) for more information.
 
-If you are running Grafana Enterprise, you can grant and revoke access by using fine-grained roles and permissions, refer to [Fine-grained access Control]({{< relref "../enterprise/access-control/_index.md" >}}) for more information.
-
 ## Organization admin role
 
 Can do everything scoped to the organization. For example:

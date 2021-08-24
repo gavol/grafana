@@ -76,10 +76,6 @@ export class InsightsConfig extends PureComponent<Props> {
             </div>
           </div>
         </div>
-
-        <Alert severity="info" title="Application Insights credentials are deprecated">
-          Configure using Azure AD App Registration above and update existing queries to use Metrics or Logs.
-        </Alert>
       </>
     );
   }

@@ -671,16 +671,6 @@ export function renderTemplate(aliasPattern: string, aliasData: { [key: string]:
   });
 }
 
-export function renderTemplate(aliasPattern: string, aliasData: { [key: string]: string }) {
-  const aliasRegex = /\{\{\s*(.+?)\s*\}\}/g;
-  return aliasPattern.replace(aliasRegex, (_match, g1) => {
-    if (aliasData[g1]) {
-      return aliasData[g1];
-    }
-    return '';
-  });
-}
-
 export function lokiRegularEscape(value: any) {
   if (typeof value === 'string') {
     return value.replace(/'/g, "\\\\'");

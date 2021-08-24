@@ -51,7 +51,6 @@ def get_steps(edition, is_downstream=False):
         test_frontend_step(),
         build_backend_step(edition=edition, ver_mode=ver_mode, is_downstream=is_downstream),
         build_frontend_step(edition=edition, ver_mode=ver_mode, is_downstream=is_downstream),
-        frontend_metrics_step(edition=edition),
         build_plugins_step(edition=edition, sign=True),
         validate_scuemata(),
     ]

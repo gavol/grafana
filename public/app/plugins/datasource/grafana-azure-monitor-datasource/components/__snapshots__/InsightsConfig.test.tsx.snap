@@ -71,12 +71,6 @@ exports[`Render should disable insights api key input 1`] = `
       </div>
     </div>
   </div>
-  <Alert
-    severity="info"
-    title="Application Insights credentials are deprecated"
-  >
-    Configure using Azure AD App Registration above and update existing queries to use Metrics or Logs.
-  </Alert>
 </Fragment>
 `;
 
@@ -140,12 +134,6 @@ exports[`Render should enable insights api key input 1`] = `
       </div>
     </div>
   </div>
-  <Alert
-    severity="info"
-    title="Application Insights credentials are deprecated"
-  >
-    Configure using Azure AD App Registration above and update existing queries to use Metrics or Logs.
-  </Alert>
 </Fragment>
 `;
 
@@ -211,11 +199,5 @@ exports[`Render should render component 1`] = `
       </div>
     </div>
   </div>
-  <Alert
-    severity="info"
-    title="Application Insights credentials are deprecated"
-  >
-    Configure using Azure AD App Registration above and update existing queries to use Metrics or Logs.
-  </Alert>
 </Fragment>
 `;

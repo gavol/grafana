@@ -42,7 +42,7 @@ func (am *ForkedAMSvc) getService(ctx *models.ReqContext) (AlertmanagerApiServic
 func (am *ForkedAMSvc) RouteGetAMStatus(ctx *models.ReqContext) response.Response {
 	s, err := am.getService(ctx)
 	if err != nil {
-		return ErrResp(400, err, "")
+		return response.Error(400, err.Error(), nil)
 	}
 
 	return s.RouteGetAMStatus(ctx)

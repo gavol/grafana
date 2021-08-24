@@ -452,24 +452,4 @@ func WrapCUEError(err error) error {
 	return err
 }
 
-// WrapCUEError is a wrapper for cueErrors that occur and are not self explanatory.
-// If an error is of type cueErr, then iterate through the error array, export line number
-// and filename, otherwise return usual error.
-func WrapCUEError(err error) error {
-	var cErr errs.Error
-	m := make(map[int]string)
-	if ok := errors.As(err, &cErr); ok {
-		for _, e := range errs.Errors(err) {
-			if e.Position().File() != nil {
-				line := e.Position().Line()
-				m[line] = fmt.Sprintf("%q: in file %s", err, e.Position().File().Name())
-			}
-		}
-	}
-	if len(m) != 0 {
-		return &CueError{m}
-	}
-	return err
-}
-
 // TODO add migrator with SearchOption for stopping criteria
