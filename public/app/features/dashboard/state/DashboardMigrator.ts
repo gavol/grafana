@@ -962,10 +962,13 @@ function upgradeValueMappingsForPanel(panel: PanelModel) {
     );
   }
 
-  for (const override of fieldConfig.overrides) {
-    for (const prop of override.properties) {
-      if (prop.id === 'mappings') {
-        prop.value = upgradeValueMappings(prop.value);
+  // Protect against no overrides
+  if (Array.isArray(fieldConfig.overrides)) {
+    for (const override of fieldConfig.overrides) {
+      for (const prop of override.properties) {
+        if (prop.id === 'mappings') {
+          prop.value = upgradeValueMappings(prop.value);
+        }
       }
     }
   }

@@ -21,6 +21,14 @@ import (
 	"github.com/grafana/grafana/pkg/setting"
 )
 
+var permittedFileExts = []string{
+	".html", ".xhtml", ".css", ".js", ".json", ".jsonld", ".map", ".mjs",
+	".jpeg", ".jpg", ".png", ".gif", ".svg", ".webp", ".ico",
+	".woff", ".woff2", ".eot", ".ttf", ".otf",
+	".wav", ".mp3",
+	".md", ".pdf", ".txt",
+}
+
 func (hs *HTTPServer) GetPluginList(c *models.ReqContext) response.Response {
 	typeFilter := c.Query("type")
 	enabledFilter := c.Query("enabled")
@@ -261,7 +269,7 @@ func (hs *HTTPServer) GetPluginAssets(c *models.ReqContext) {
 	pluginID := c.Params("pluginId")
 	plugin := hs.PluginManager.GetPlugin(pluginID)
 	if plugin == nil {
-		c.Handle(hs.Cfg, 404, "Plugin not found", nil)
+		c.JsonApiErr(404, "Plugin not found", nil)
 		return
 	}
 
@@ -274,10 +282,10 @@ func (hs *HTTPServer) GetPluginAssets(c *models.ReqContext) {
 	f, err := os.Open(pluginFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			c.Handle(hs.Cfg, 404, "Plugin file not found", err)
+			c.JsonApiErr(404, "Plugin file not found", err)
 			return
 		}
-		c.Handle(hs.Cfg, 500, "Could not open plugin file", err)
+		c.JsonApiErr(500, "Could not open plugin file", err)
 		return
 	}
 	defer func() {
@@ -288,13 +296,13 @@ func (hs *HTTPServer) GetPluginAssets(c *models.ReqContext) {
 
 	fi, err := f.Stat()
 	if err != nil {
-		c.Handle(hs.Cfg, 500, "Plugin file exists but could not open", err)
+		c.JsonApiErr(500, "Plugin file exists but could not open", err)
 		return
 	}
 
-	if shouldExclude(fi) {
-		c.Handle(hs.Cfg, 403, "Plugin file access forbidden",
-			fmt.Errorf("access is forbidden to executable plugin file %s", pluginFilePath))
+	if accessForbidden(fi.Name()) {
+		c.JsonApiErr(403, "Plugin file access forbidden",
+			fmt.Errorf("access is forbidden to plugin file %s", pluginFilePath))
 		return
 	}
 
@@ -441,12 +449,13 @@ func translatePluginRequestErrorToAPIError(err error) response.Response {
 	return response.Error(500, "Plugin request failed", err)
 }
 
-func shouldExclude(fi os.FileInfo) bool {
-	normalizedFilename := strings.ToLower(fi.Name())
+func accessForbidden(pluginFilename string) bool {
+	ext := filepath.Ext(pluginFilename)
 
-	isUnixExecutable := fi.Mode()&0111 == 0111
-	isWindowsExecutable := strings.HasSuffix(normalizedFilename, ".exe")
-	isScript := strings.HasSuffix(normalizedFilename, ".sh")
-
-	return isUnixExecutable || isWindowsExecutable || isScript
+	for _, permittedExt := range permittedFileExts {
+		if strings.EqualFold(permittedExt, ext) {
+			return false
+		}
+	}
+	return true
 }

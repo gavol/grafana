@@ -63,10 +63,13 @@ Object {
     },
     "points": Object {
       "fill": [Function],
+      "show": false,
       "size": [Function],
       "stroke": [Function],
       "width": [Function],
     },
+    "x": false,
+    "y": false,
   },
   "hooks": Object {
     "draw": Array [
@@ -101,21 +104,24 @@ Object {
   },
   "select": undefined,
   "series": Array [
-    Object {},
+    Object {
+      "value": [Function],
+    },
     Object {
       "fill": [Function],
       "paths": [Function],
       "points": Object {
-        "fill": undefined,
+        "fill": "#808080",
         "filter": undefined,
         "size": undefined,
-        "stroke": undefined,
+        "stroke": "#808080",
       },
-      "pxAlign": false,
+      "pxAlign": true,
       "scale": "m/s",
       "show": true,
       "spanGaps": undefined,
       "stroke": "#808080",
+      "value": [Function],
       "width": 2,
     },
   ],
@@ -186,10 +192,13 @@ Object {
     },
     "points": Object {
       "fill": [Function],
+      "show": false,
       "size": [Function],
       "stroke": [Function],
       "width": [Function],
     },
+    "x": false,
+    "y": false,
   },
   "hooks": Object {
     "draw": Array [
@@ -224,21 +233,24 @@ Object {
   },
   "select": undefined,
   "series": Array [
-    Object {},
+    Object {
+      "value": [Function],
+    },
     Object {
       "fill": [Function],
       "paths": [Function],
       "points": Object {
-        "fill": undefined,
+        "fill": "#808080",
         "filter": undefined,
         "size": undefined,
-        "stroke": undefined,
+        "stroke": "#808080",
       },
-      "pxAlign": false,
+      "pxAlign": true,
       "scale": "m/s",
       "show": true,
       "spanGaps": undefined,
       "stroke": "#808080",
+      "value": [Function],
       "width": 2,
     },
   ],
@@ -309,10 +321,13 @@ Object {
     },
     "points": Object {
       "fill": [Function],
+      "show": false,
       "size": [Function],
       "stroke": [Function],
       "width": [Function],
     },
+    "x": false,
+    "y": false,
   },
   "hooks": Object {
     "draw": Array [
@@ -347,21 +362,24 @@ Object {
   },
   "select": undefined,
   "series": Array [
-    Object {},
+    Object {
+      "value": [Function],
+    },
     Object {
       "fill": [Function],
       "paths": [Function],
       "points": Object {
-        "fill": undefined,
+        "fill": "#808080",
         "filter": undefined,
         "size": undefined,
-        "stroke": undefined,
+        "stroke": "#808080",
       },
-      "pxAlign": false,
+      "pxAlign": true,
       "scale": "m/s",
       "show": true,
       "spanGaps": undefined,
       "stroke": "#808080",
+      "value": [Function],
       "width": 2,
     },
   ],
@@ -432,10 +450,13 @@ Object {
     },
     "points": Object {
       "fill": [Function],
+      "show": false,
       "size": [Function],
       "stroke": [Function],
       "width": [Function],
     },
+    "x": false,
+    "y": false,
   },
   "hooks": Object {
     "draw": Array [
@@ -470,21 +491,24 @@ Object {
   },
   "select": undefined,
   "series": Array [
-    Object {},
+    Object {
+      "value": [Function],
+    },
     Object {
       "fill": [Function],
       "paths": [Function],
       "points": Object {
-        "fill": undefined,
+        "fill": "#808080",
         "filter": undefined,
         "size": undefined,
-        "stroke": undefined,
+        "stroke": "#808080",
       },
-      "pxAlign": false,
+      "pxAlign": true,
       "scale": "m/s",
       "show": true,
       "spanGaps": undefined,
       "stroke": "#808080",
+      "value": [Function],
       "width": 2,
     },
   ],
@@ -555,10 +579,13 @@ Object {
     },
     "points": Object {
       "fill": [Function],
+      "show": false,
       "size": [Function],
       "stroke": [Function],
       "width": [Function],
     },
+    "x": false,
+    "y": false,
   },
   "hooks": Object {
     "draw": Array [
@@ -593,21 +620,24 @@ Object {
   },
   "select": undefined,
   "series": Array [
-    Object {},
+    Object {
+      "value": [Function],
+    },
     Object {
       "fill": [Function],
       "paths": [Function],
       "points": Object {
-        "fill": undefined,
+        "fill": "#808080",
         "filter": undefined,
         "size": undefined,
-        "stroke": undefined,
+        "stroke": "#808080",
       },
-      "pxAlign": false,
+      "pxAlign": true,
       "scale": "m/s",
       "show": true,
       "spanGaps": undefined,
       "stroke": "#808080",
+      "value": [Function],
       "width": 2,
     },
   ],
@@ -678,10 +708,13 @@ Object {
     },
     "points": Object {
       "fill": [Function],
+      "show": false,
       "size": [Function],
       "stroke": [Function],
       "width": [Function],
     },
+    "x": false,
+    "y": false,
   },
   "hooks": Object {
     "draw": Array [
@@ -716,21 +749,24 @@ Object {
   },
   "select": undefined,
   "series": Array [
-    Object {},
+    Object {
+      "value": [Function],
+    },
     Object {
       "fill": [Function],
       "paths": [Function],
       "points": Object {
-        "fill": undefined,
+        "fill": "#808080",
         "filter": undefined,
         "size": undefined,
-        "stroke": undefined,
+        "stroke": "#808080",
       },
-      "pxAlign": false,
+      "pxAlign": true,
       "scale": "m/s",
       "show": true,
       "spanGaps": undefined,
       "stroke": "#808080",
+      "value": [Function],
       "width": 2,
     },
   ],
@@ -801,10 +837,13 @@ Object {
     },
     "points": Object {
       "fill": [Function],
+      "show": false,
       "size": [Function],
       "stroke": [Function],
       "width": [Function],
     },
+    "x": false,
+    "y": false,
   },
   "hooks": Object {
     "draw": Array [
@@ -839,21 +878,24 @@ Object {
   },
   "select": undefined,
   "series": Array [
-    Object {},
+    Object {
+      "value": [Function],
+    },
     Object {
       "fill": [Function],
       "paths": [Function],
       "points": Object {
-        "fill": undefined,
+        "fill": "#808080",
         "filter": undefined,
         "size": undefined,
-        "stroke": undefined,
+        "stroke": "#808080",
       },
-      "pxAlign": false,
+      "pxAlign": true,
       "scale": "m/s",
       "show": true,
       "spanGaps": undefined,
       "stroke": "#808080",
+      "value": [Function],
       "width": 2,
     },
   ],
@@ -924,10 +966,13 @@ Object {
     },
     "points": Object {
       "fill": [Function],
+      "show": false,
       "size": [Function],
       "stroke": [Function],
       "width": [Function],
     },
+    "x": false,
+    "y": false,
   },
   "hooks": Object {
     "draw": Array [
@@ -962,21 +1007,24 @@ Object {
   },
   "select": undefined,
   "series": Array [
-    Object {},
+    Object {
+      "value": [Function],
+    },
     Object {
       "fill": [Function],
       "paths": [Function],
       "points": Object {
-        "fill": undefined,
+        "fill": "#808080",
         "filter": undefined,
         "size": undefined,
-        "stroke": undefined,
+        "stroke": "#808080",
       },
-      "pxAlign": false,
+      "pxAlign": true,
       "scale": "m/s",
       "show": true,
       "spanGaps": undefined,
       "stroke": "#808080",
+      "value": [Function],
       "width": 2,
     },
   ],

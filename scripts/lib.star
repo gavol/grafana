@@ -1,6 +1,6 @@
-load('scripts/vault.star', 'from_secret', 'github_token', 'pull_secret')
+load('scripts/vault.star', 'from_secret', 'github_token', 'pull_secret', 'drone_token')
 
-grabpl_version = '2.2.8'
+grabpl_version = '2.3.2'
 build_image = 'grafana/build-container:1.4.1'
 publish_image = 'grafana/grafana-ci-deploy:1.3.1'
 grafana_docker_image = 'grafana/drone-grafana-docker:0.3.2'
@@ -193,7 +193,7 @@ def enterprise_downstream_step(edition):
         'image': 'grafana/drone-downstream',
         'settings': {
             'server': 'https://drone.grafana.net',
-            'token': from_secret('drone_token'),
+            'token': from_secret(drone_token),
             'repositories': [
                 'grafana/grafana-enterprise@main',
             ],
@@ -435,25 +435,6 @@ def build_plugins_step(edition, sign=False):
         ],
     }
 
-def frontend_metrics_step(edition):
-    if edition in ('enterprise', 'enterprise2'):
-        return None
-
-    return {
-        'name': 'publish-frontend-metrics',
-        'image': build_image,
-        'depends_on': [
-            'build-frontend',
-        ],
-        'environment': {
-            'GRAFANA_MISC_STATS_API_KEY': from_secret('grafana_misc_stats_api_key'),
-        },
-        'failure': 'ignore',
-        'commands': [
-            './scripts/ci-frontend-metrics.sh | ./bin/grabpl publish-metrics $${GRAFANA_MISC_STATS_API_KEY}',
-        ],
-    }
-
 def test_backend_step(edition, tries=None):
     test_backend_cmd = './bin/grabpl test-backend --edition {}'.format(edition)
     integration_tests_cmd = './bin/grabpl integration-tests --edition {}'.format(edition)
@@ -488,6 +469,25 @@ def test_frontend_step():
         },
         'commands': [
             'yarn run ci:test-frontend',
+        ],
+    }
+
+def frontend_metrics_step(edition):
+    if edition in ('enterprise', 'enterprise2'):
+        return None
+
+    return {
+        'name': 'publish-frontend-metrics',
+        'image': build_image,
+        'depends_on': [
+            'build-frontend',
+        ],
+        'environment': {
+            'GRAFANA_MISC_STATS_API_KEY': from_secret('grafana_misc_stats_api_key'),
+        },
+        'failure': 'ignore',
+        'commands': [
+            './scripts/ci-frontend-metrics.sh | ./bin/grabpl publish-metrics $${GRAFANA_MISC_STATS_API_KEY}',
         ],
     }
 
@@ -1076,6 +1076,6 @@ def validate_scuemata():
             'build-backend',
         ],
         'commands': [
-            './bin/linux-amd64/grafana-cli cue validate-schema',
+            './bin/linux-amd64/grafana-cli cue validate-schema --grafana-root .',
         ],
     }

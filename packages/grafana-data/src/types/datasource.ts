@@ -76,7 +76,7 @@ export class DataSourcePlugin<
     return this;
   }
 
-  setQueryEditorHelp(QueryEditorHelp: ComponentType<QueryEditorHelpProps>) {
+  setQueryEditorHelp(QueryEditorHelp: ComponentType<QueryEditorHelpProps<TQuery>>) {
     this.components.QueryEditorHelp = QueryEditorHelp;
     return this;
   }
@@ -84,7 +84,7 @@ export class DataSourcePlugin<
   /**
    * @deprecated prefer using `setQueryEditorHelp`
    */
-  setExploreStartPage(ExploreStartPage: ComponentType<QueryEditorHelpProps>) {
+  setExploreStartPage(ExploreStartPage: ComponentType<QueryEditorHelpProps<TQuery>>) {
     return this.setQueryEditorHelp(ExploreStartPage);
   }
 
@@ -157,7 +157,7 @@ export interface DataSourcePluginComponents<
   ExploreQueryField?: ComponentType<ExploreQueryFieldProps<DSType, TQuery, TOptions>>;
   ExploreMetricsQueryField?: ComponentType<ExploreQueryFieldProps<DSType, TQuery, TOptions>>;
   ExploreLogsQueryField?: ComponentType<ExploreQueryFieldProps<DSType, TQuery, TOptions>>;
-  QueryEditorHelp?: ComponentType<QueryEditorHelpProps>;
+  QueryEditorHelp?: ComponentType<QueryEditorHelpProps<TQuery>>;
   ConfigEditor?: ComponentType<DataSourcePluginOptionsEditorProps<TOptions, TSecureOptions>>;
   MetadataInspector?: ComponentType<MetadataInspectorProps<DSType, TQuery, TOptions>>;
 }
@@ -218,7 +218,7 @@ abstract class DataSourceApi<
   /**
    * Imports queries from a different datasource
    */
-  async importQueries?(queries: DataQuery[], originDataSource: DataSourceApi): Promise<TQuery[]>;
+  async importQueries?(queries: DataQuery[], originDataSource: DataSourceApi<DataQuery>): Promise<TQuery[]>;
 
   /**
    * Returns configuration for importing queries from other data sources
@@ -236,7 +236,11 @@ abstract class DataSourceApi<
   abstract query(request: DataQueryRequest<TQuery>): Promise<DataQueryResponse> | Observable<DataQueryResponse>;
 
   /**
-   * Test & verify datasource settings & connection details
+   * Test & verify datasource settings & connection details (returning TestingStatus)
+   *
+   * When verification fails - errors specific to the data source should be handled here and converted to
+   * a TestingStatus object. Unknown errors and HTTP errors can be re-thrown and will be handled here:
+   * public/app/features/datasources/state/actions.ts
    */
   abstract testDatasource(): Promise<any>;
 
@@ -395,9 +399,9 @@ export interface ExploreQueryFieldProps<
   exploreId?: any;
 }
 
-export interface QueryEditorHelpProps {
-  datasource: DataSourceApi;
-  onClickExample: (query: DataQuery) => void;
+export interface QueryEditorHelpProps<TQuery extends DataQuery = DataQuery> {
+  datasource: DataSourceApi<TQuery>;
+  onClickExample: (query: TQuery) => void;
   exploreId?: any;
 }
 
@@ -480,7 +484,13 @@ export enum DataQueryErrorType {
 
 export interface DataQueryError {
   data?: {
+    /**
+     * Short information about the error
+     */
     message?: string;
+    /**
+     * Detailed information about the error. Only returned when app_mode is development.
+     */
     error?: string;
   };
   message?: string;
@@ -556,6 +566,7 @@ export interface DataSourceJsonData {
   authType?: string;
   defaultRegion?: string;
   profile?: string;
+  manageAlerts?: boolean;
 }
 
 /**

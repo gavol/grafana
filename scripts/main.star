@@ -73,6 +73,7 @@ def get_steps(edition, is_downstream=False):
         e2e_tests_step(edition=edition),
         build_storybook_step(edition=edition, ver_mode=ver_mode),
         publish_storybook_step(edition=edition, ver_mode=ver_mode),
+        frontend_metrics_step(edition=edition),
         build_frontend_docs_step(edition=edition),
         copy_packages_for_docker_step(),
         build_docker_images_step(edition=edition, ver_mode=ver_mode, publish=publish),

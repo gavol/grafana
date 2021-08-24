@@ -39,6 +39,15 @@ func (am *ForkedAMSvc) getService(ctx *models.ReqContext) (AlertmanagerApiServic
 	}
 }
 
+func (am *ForkedAMSvc) RouteGetAMStatus(ctx *models.ReqContext) response.Response {
+	s, err := am.getService(ctx)
+	if err != nil {
+		return ErrResp(400, err, "")
+	}
+
+	return s.RouteGetAMStatus(ctx)
+}
+
 func (am *ForkedAMSvc) RouteCreateSilence(ctx *models.ReqContext, body apimodels.PostableSilence) response.Response {
 	s, err := am.getService(ctx)
 	if err != nil {
