@@ -324,7 +324,7 @@ export class PanelModel implements DataConfigSource {
       scopedVars: this.scopedVars,
       cacheTimeout: this.cacheTimeout,
       transformations: this.transformations,
-      maxPBeast: this.maxPBeast || width,
+      maxPBeast: this.maxPBeast === 0 ? width : this.maxPBeast || 100,
       intervalPBeast: this.intervalPBeast || '',
       fillGap: this.fillGap,
       maxSelect: this.maxSelect,
