@@ -48,24 +48,27 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
       }
   }
 
-  // Loop over the "not-main" series in order to add the "meta" attributes 
-  for(let i = 0; i < allSeries.length; ++i) {
-      let s = allSeries[i];
-      if(s.meta !== undefined && s.hasOwnProperty("meta") === true) {
-          let extraOpts = s.meta.v2;
-          for(let j = 0; j < s.fields.length; ++j) {
-              let f = s.fields[j];
-              if(f.name === "Value") {
-                  for(let opt in extraOpts) {
-                      if(extraOpts.hasOwnProperty(opt) === true) {
-                          f.config.custom[opt] = extraOpts[opt];
+  // Loop over the "not-main" series in order to add the "meta" attributes
+  let hasKeys = !!Object.keys(mainSeries).length;
+  if(hasKeys === true) { 
+      for(let i = 0; i < allSeries.length; ++i) {
+          let s = allSeries[i];
+          if(s.meta !== undefined && s.hasOwnProperty("meta") === true) {
+              let extraOpts = s.meta.v2;
+              for(let j = 0; j < s.fields.length; ++j) {
+                  let f = s.fields[j];
+                  if(f.name === "Value") {
+                      for(let opt in extraOpts) {
+                          if(extraOpts.hasOwnProperty(opt) === true) {
+                              f.config.custom[opt] = extraOpts[opt];
+                          }
                       }
-                  }
-                  let ms = extraOpts.mainSeries;
-                  let v = mainSeries[ms];
-                  if(v !== undefined) {
-                      f.config.custom.hideFrom.viz = v['viz'];
-                      f.config.custom.axisPlacement = v['axisPlacement'];
+                      let ms = extraOpts.mainSeries;
+                      let v = mainSeries[ms];
+                      if(v !== undefined) {
+                          f.config.custom.hideFrom.viz = v['viz'];
+                          f.config.custom.axisPlacement = v['axisPlacement'];
+                      }
                   }
               }
           }
