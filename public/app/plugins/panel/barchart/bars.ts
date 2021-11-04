@@ -2,15 +2,8 @@ import uPlot, { Axis, AlignedData } from 'uplot';
 import { pointWithin, Quadtree, Rect } from './quadtree';
 import { distribute, SPACE_BETWEEN } from './distribute';
 import { DataFrame, GrafanaTheme2 } from '@grafana/data';
-import {
-  calculateFontSize,
-  PlotTooltipInterpolator,
-  VizTextDisplayOptions,
-  StackingMode,
-  BarValueVisibility,
-  ScaleDirection,
-  ScaleOrientation,
-} from '@grafana/ui';
+import { calculateFontSize, PlotTooltipInterpolator } from '@grafana/ui';
+import { StackingMode, VisibilityMode, ScaleDirection, ScaleOrientation, VizTextDisplayOptions } from '@grafana/schema';
 import { preparePlotData } from '../../../../../packages/grafana-ui/src/components/uPlot/utils';
 
 const groupDistr = SPACE_BETWEEN;
@@ -40,7 +33,7 @@ export interface BarsOptions {
   xDir: ScaleDirection;
   groupWidth: number;
   barWidth: number;
-  showValue: BarValueVisibility;
+  showValue: VisibilityMode;
   stacking: StackingMode;
   rawValue: (seriesIdx: number, valueIdx: number) => number | null;
   formatValue: (seriesIdx: number, value: any) => string;
@@ -200,7 +193,7 @@ export function getConfig(opts: BarsOptions, theme: GrafanaTheme2) {
 
   // uPlot hook to draw the labels on the bar chart.
   const draw = (u: uPlot) => {
-    if (showValue === BarValueVisibility.Never) {
+    if (showValue === VisibilityMode.Never) {
       return;
     }
     // pre-cache formatted labels
@@ -229,11 +222,13 @@ export function getConfig(opts: BarsOptions, theme: GrafanaTheme2) {
           )
         );
 
-        if (fontSize < VALUE_MIN_FONT_SIZE && showValue !== BarValueVisibility.Always) {
+        if (fontSize < VALUE_MIN_FONT_SIZE && showValue !== VisibilityMode.Always) {
           return;
         }
       }
     }
+
+    u.ctx.save();
 
     u.ctx.fillStyle = theme.colors.text.primary;
     u.ctx.font = `${fontSize}px ${theme.typography.fontFamily}`;
@@ -266,6 +261,8 @@ export function getConfig(opts: BarsOptions, theme: GrafanaTheme2) {
         );
       }
     });
+
+    u.ctx.restore();
   };
 
   // handle hover interaction with quadtree probing
@@ -311,10 +308,10 @@ export function getConfig(opts: BarsOptions, theme: GrafanaTheme2) {
 
   let alignedTotals: AlignedData | null = null;
 
-  function prepData(alignedFrame: DataFrame) {
+  function prepData(frames: DataFrame[]) {
     alignedTotals = null;
 
-    return preparePlotData(alignedFrame, ({ totals }) => {
+    return preparePlotData(frames, ({ totals }) => {
       alignedTotals = totals;
     });
   }

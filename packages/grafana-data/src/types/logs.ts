@@ -1,7 +1,7 @@
 import { Labels } from './data';
 import { DataFrame } from './dataFrame';
+import { DataQuery } from './query';
 import { AbsoluteTimeRange } from './time';
-import { DataQuery } from './datasource';
 
 /**
  * Mapping of log level abbreviation to canonical log level.
@@ -131,9 +131,9 @@ export interface LogsParser {
   getValueFromField: (field: string) => string;
   /**
    * Function to verify if this is a valid parser for the given line.
-   * The parser accepts the line unless it returns undefined.
+   * The parser accepts the line if it returns true.
    */
-  test: (line: string) => any;
+  test: (line: string) => boolean;
 }
 
 export enum LogsDedupDescription {

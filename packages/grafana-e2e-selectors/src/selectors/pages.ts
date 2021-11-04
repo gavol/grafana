@@ -1,5 +1,10 @@
 import { Components } from './components';
 
+/**
+ * Selectors grouped/defined in Pages
+ *
+ * @alpha
+ */
 export const Pages = {
   Login: {
     url: '/login',
@@ -154,6 +159,7 @@ export const Pages = {
   PluginPage: {
     page: 'Plugin page',
     signatureInfo: 'Plugin signature info',
+    disabledInfo: 'Plugin disabled info',
   },
   PlaylistForm: {
     name: 'Playlist name',

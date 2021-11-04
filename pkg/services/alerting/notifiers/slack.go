@@ -63,14 +63,14 @@ func init() {
 				Element:      alerting.ElementTypeInput,
 				InputType:    alerting.InputTypeText,
 				Description:  "Provide an emoji to use as the icon for the bot's message. Overrides the icon URL.",
-				PropertyName: "iconEmoji",
+				PropertyName: "icon_emoji",
 			},
 			{
 				Label:        "Icon URL",
 				Element:      alerting.ElementTypeInput,
 				InputType:    alerting.InputTypeText,
 				Description:  "Provide a URL to an image to use as the icon for the bot's message",
-				PropertyName: "iconUrl",
+				PropertyName: "icon_url",
 			},
 			{
 				Label:        "Mention Users",
@@ -382,15 +382,17 @@ func (sn *SlackNotifier) sendRequest(ctx context.Context, data []byte) error {
 		return fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	if resp.StatusCode/100 == 2 {
-		var rslt map[string]interface{}
+	if resp.StatusCode >= http.StatusOK && resp.StatusCode < http.StatusMultipleChoices {
 		// Slack responds to some requests with a JSON document, that might contain an error
+		rslt := struct {
+			Ok  bool   `json:"ok"`
+			Err string `json:"error"`
+		}{}
 		if err := json.Unmarshal(body, &rslt); err == nil {
-			if !rslt["ok"].(bool) {
-				errMsg := rslt["error"].(string)
+			if !rslt.Ok && rslt.Err != "" {
 				sn.log.Warn("Sending Slack API request failed", "url", sn.url.String(), "statusCode", resp.Status,
-					"err", errMsg)
-				return fmt.Errorf("failed to make Slack API request: %s", errMsg)
+					"err", rslt.Err)
+				return fmt.Errorf("failed to make Slack API request: %s", rslt.Err)
 			}
 		}
 

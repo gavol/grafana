@@ -4,6 +4,11 @@
 // but you still might need to select it for testing,
 // in that case please add the attribute data-test-id={selector} in the component and
 // prefix your selector string with 'data-test-id' so that when create the selectors we know to search for it on the right attribute
+/**
+ * Selectors grouped/defined in Components
+ *
+ * @alpha
+ */
 export const Components = {
   TimePicker: {
     openButton: 'data-testid TimePicker Open Button',
@@ -73,6 +78,7 @@ export const Components = {
       },
       Table: {
         header: 'table header',
+        footer: 'table-footer',
       },
     },
   },
@@ -194,8 +200,12 @@ export const Components = {
   FolderPicker: {
     container: 'Folder picker select container',
   },
+  ReadonlyFolderPicker: {
+    container: 'data-testid Readonly folder picker select container',
+  },
   DataSourcePicker: {
     container: 'Data source picker select container',
+    input: () => 'input[id="data-source-picker"]',
   },
   TimeZonePicker: {
     container: 'Time zone picker select container',
@@ -236,5 +246,8 @@ export const Components = {
   ImportDashboardForm: {
     name: 'data-testid-import-dashboard-title',
     submit: 'data-testid-import-dashboard-submit',
+  },
+  PanelAlertTabContent: {
+    content: 'Unified alert editor tab content',
   },
 };

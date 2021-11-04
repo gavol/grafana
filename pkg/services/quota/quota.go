@@ -5,23 +5,21 @@ import (
 
 	"github.com/grafana/grafana/pkg/bus"
 	"github.com/grafana/grafana/pkg/models"
-	"github.com/grafana/grafana/pkg/registry"
 	"github.com/grafana/grafana/pkg/setting"
 )
 
 var ErrInvalidQuotaTarget = errors.New("invalid quota target")
 
-func init() {
-	registry.RegisterService(&QuotaService{})
+func ProvideService(cfg *setting.Cfg, tokenService models.UserTokenService) *QuotaService {
+	return &QuotaService{
+		Cfg:              cfg,
+		AuthTokenService: tokenService,
+	}
 }
 
 type QuotaService struct {
-	AuthTokenService models.UserTokenService `inject:""`
-	Cfg              *setting.Cfg            `inject:""`
-}
-
-func (qs *QuotaService) Init() error {
-	return nil
+	AuthTokenService models.UserTokenService
+	Cfg              *setting.Cfg
 }
 
 func (qs *QuotaService) QuotaReached(c *models.ReqContext, target string) (bool, error) {
@@ -64,7 +62,7 @@ func (qs *QuotaService) QuotaReached(c *models.ReqContext, target string) (bool,
 				}
 				continue
 			}
-			query := models.GetGlobalQuotaByTargetQuery{Target: scope.Target, IsNgAlertEnabled: qs.Cfg.IsNgAlertEnabled()}
+			query := models.GetGlobalQuotaByTargetQuery{Target: scope.Target, UnifiedAlertingEnabled: qs.Cfg.UnifiedAlerting.Enabled}
 			if err := bus.Dispatch(&query); err != nil {
 				return true, err
 			}
@@ -76,10 +74,10 @@ func (qs *QuotaService) QuotaReached(c *models.ReqContext, target string) (bool,
 				continue
 			}
 			query := models.GetOrgQuotaByTargetQuery{
-				OrgId:            c.OrgId,
-				Target:           scope.Target,
-				Default:          scope.DefaultLimit,
-				IsNgAlertEnabled: qs.Cfg.IsNgAlertEnabled(),
+				OrgId:                  c.OrgId,
+				Target:                 scope.Target,
+				Default:                scope.DefaultLimit,
+				UnifiedAlertingEnabled: qs.Cfg.UnifiedAlerting.Enabled,
 			}
 			if err := bus.Dispatch(&query); err != nil {
 				return true, err
@@ -98,7 +96,7 @@ func (qs *QuotaService) QuotaReached(c *models.ReqContext, target string) (bool,
 			if !c.IsSignedIn || c.UserId == 0 {
 				continue
 			}
-			query := models.GetUserQuotaByTargetQuery{UserId: c.UserId, Target: scope.Target, Default: scope.DefaultLimit, IsNgAlertEnabled: qs.Cfg.IsNgAlertEnabled()}
+			query := models.GetUserQuotaByTargetQuery{UserId: c.UserId, Target: scope.Target, Default: scope.DefaultLimit, UnifiedAlertingEnabled: qs.Cfg.UnifiedAlerting.Enabled}
 			if err := bus.Dispatch(&query); err != nil {
 				return true, err
 			}

@@ -44,6 +44,7 @@ export const jestConfig = (baseDir: string = process.cwd()) => {
   const { moduleNameMapper, ...otherOverrides } = jestConfigOverrides;
   const moduleNameMapperConfig = {
     '\\.(css|sass|scss)$': `${__dirname}/styles.mock.js`,
+    'react-inlinesvg': `${__dirname}/react-inlinesvg.tsx`,
     ...moduleNameMapper,
   };
 
@@ -60,7 +61,7 @@ export const jestConfig = (baseDir: string = process.cwd()) => {
     globals: {
       'ts-jest': {
         isolatedModules: true,
-        tsConfig: path.resolve(baseDir, 'tsconfig.json'),
+        tsconfig: path.resolve(baseDir, 'tsconfig.json'),
       },
     },
     coverageReporters: ['json-summary', 'text', 'lcov'],
