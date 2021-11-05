@@ -25,6 +25,7 @@ export class PanelEditorQueries extends PureComponent<Props> {
       queries: panel.targets,
       maxDataPoints: panel.maxDataPoints,
       minInterval: panel.interval,
+      // *** START_OF_CHANGE ***
       maxPBeast: panel.maxPBeast,
       intervalPBeast: panel.intervalPBeast,
       fillGap: panel.fillGap,
@@ -33,6 +34,7 @@ export class PanelEditorQueries extends PureComponent<Props> {
       errorBar: panel.errorBar,
       beforeInterval: panel.beforeInterval,
       afterInterval: panel.afterInterval,
+      // *** END_OF_CHANGE ***
       timeRange: {
         from: panel.timeFrom,
         shift: panel.timeShift,

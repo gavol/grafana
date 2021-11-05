@@ -200,6 +200,7 @@ class MetricsPanelCtrl extends PanelCtrl {
       minInterval: panel.interval,
       scopedVars: panel.scopedVars,
       cacheTimeout: panel.cacheTimeout,
+      // *** START_OF_CHANGE ***
       maxPBeast: panel.maxPBeast === 0 ? this.width : panel.maxPBeast || 100, //this.width,
       intervalPBeast: panel.intervalPBeast || '60s',
       fillGap: panel.fillGap,
@@ -208,6 +209,7 @@ class MetricsPanelCtrl extends PanelCtrl {
       errorBar: panel.errorBar || false,
       beforeInterval: panel.beforeInterval || '60',
       afterInterval: panel.afterInterval || '60',
+      // *** END_OF_CHANGE ***
       transformations: panel.transformations,
     });
   }

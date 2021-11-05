@@ -5,7 +5,10 @@ import React, { PureComponent, ChangeEvent, FocusEvent } from 'react';
 import { rangeUtil, PanelData, DataSourceApi } from '@grafana/data';
 
 // Components
+// *** START_OF_CHANGE ***
+// Added the import of Checkbox
 import { Checkbox, Switch, Input, InlineField, InlineFormLabel, stylesFactory } from '@grafana/ui';
+// *** END_OF_CHANGE ***
 
 // Types
 import { QueryOperationRow } from 'app/core/components/QueryOperationRow/QueryOperationRow';
@@ -145,6 +148,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
     }
   };
 
+  // *** START_OF_CHANGE ***
   onToggleBarChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const { onChange, options } = this.props;
     let errorBar = event.target.value === 'true' ? true : false;
@@ -361,6 +365,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
       </div>
     );
   }
+  // *** END_OF_CHANGE ***
 
   renderCacheTimeoutOption() {
     const { dataSource, options } = this.props;
@@ -392,14 +397,19 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
   }
 
   renderMaxDataPointsOption() {
+    // *** START_OF_CHANGE ***
+    // Added the import of dataSource
     const { data, dataSource, options } = this.props;
+    // *** END_OF_CHANGE ***
     const realMd = data.request?.maxDataPoints;
     const value = options.maxDataPoints ?? '';
     const isAuto = value === '';
 
+    // *** START_OF_CHANGE ***
     if (!dataSource.meta.queryOptions?.maxDataPoints) {
       return null;
     }
+    // *** END_OF_CHANGE ***
 
     return (
       <div className="gf-form-inline">
@@ -439,9 +449,11 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
     const realInterval = data.request?.interval;
     const minIntervalOnDs = dataSource.interval ?? 'No limit';
 
+    // *** START_OF_CHANGE ***
     if (!dataSource.meta.queryOptions?.minInterval) {
       return null;
     }
+    // *** END_OF_CHANGE ***
 
     return (
       <>
@@ -491,6 +503,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
     );
   }
 
+  // *** START_OF_CHANGE ***
   renderMaxPBeastOption() {
     const { data, dataSource, options } = this.props;
     if (!dataSource.meta.queryOptions?.maxPBeast) {
@@ -578,6 +591,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
       </>
     );
   }
+  // *** END_OF_CHANGE ***
 
   onOpenOptions = () => {
     this.setState({ isOpen: true });
@@ -605,6 +619,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
       intervalDesc = `${data.request.interval}`;
     }
 
+    // *** START_OF_CHANGE ***
     if (options.maxPBeast || options.maxPBeast === 0) {
       mdDesc = options.maxPBeast ?? 100;
       if (mdDesc === 0 && data.request) {
@@ -630,6 +645,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
         </>
       );
     }
+    // *** END_OF_CHANGE ***
   }
 
   render() {
@@ -649,14 +665,16 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
       >
         {this.renderMaxDataPointsOption()}
         {this.renderIntervalOption()}
+        {this.renderCacheTimeoutOption()}
+        {/* START_OF_CHANGE */}
         {this.renderMaxPBeastOption()}
         {this.renderIntervalPBeastOption()}
-        {this.renderCacheTimeoutOption()}
         {this.renderRefStringOption()}
         {this.renderErrorBarOption()}
         {this.renderFillGapOption()}
         {this.renderBeforeIntervalOption()}
         {this.renderAfterIntervalOption()}
+        {/* END_OF_CHANGE */}
 
         <div className="gf-form">
           <InlineFormLabel width={9}>Relative time</InlineFormLabel>
