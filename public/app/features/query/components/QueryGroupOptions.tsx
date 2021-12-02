@@ -243,7 +243,10 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
   renderFillGapOption() {
     const { dataSource, options } = this.props; //, options } = this.props;
 
-    const tooltip = `The default value is Near`;
+    const tooltip = "The default (and recommented) value is \"Near\"."  +
+    "With \"All\", the returned time series will all have the same number of data-points and identical time-stamps " +
+    "(use this for correlation plots, with the MetaQueries plugin or the transform actions). With \"None\", no extra processing is done on data.";
+    
     let fillGap = options.fillGap ?? 'near';
 
     if (!dataSource.meta.queryOptions?.fillGap) {
@@ -277,7 +280,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
 
     return (
       <div className="gf-form">
-        <InlineFormLabel width={9} tooltip={<>Enable/Disable Error Bars</>}>
+        <InlineFormLabel width={9} tooltip={<>Enable/disable the error bands</>}>
           Error Bar
         </InlineFormLabel>
         <select value={errorBar} className="width-6" onChange={this.onToggleBarChange}>
@@ -325,7 +328,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
 
     return (
       <div className="gf-form">
-        <InlineFormLabel width={12} tooltip={<>The default value is 60 seconds</>}>
+        <InlineFormLabel width={12} tooltip={<>Extend the query time interval (value to be defined in seconds)</>}>
           Lookup before time interval
         </InlineFormLabel>
         <Input
@@ -351,7 +354,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
 
     return (
       <div className="gf-form">
-        <InlineFormLabel width={12} tooltip={<>The default value is 60 seconds</>}>
+        <InlineFormLabel width={12} tooltip={<>Extend the query time interval (value to be defined in seconds)</>}>
           Lookup after time interval
         </InlineFormLabel>
         <Input
@@ -526,8 +529,8 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
             width={2}
             tooltip={
               <>
-                The maximum data points per series. Used directly by some data sources and used in calculation of auto
-                interval. With streaming data this value is used for the rolling buffer.
+                The maximum number of data points per series. Default value is 100. A value of 0 would set the
+                maximum number of data points per series equal to the pixel width of the graph on the screen.
               </>
             }
           >
@@ -571,8 +574,8 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
               width={2}
               tooltip={
                 <>
-                  The evaluated Interval that is sent to data source and is used in <code>$__interval</code> and{' '}
-                  <code>$__interval_ms</code>
+                  Set the minimum time interval between data points in a series. Valid formats are, for instance,
+                  10s, 10m, 1h.
                 </>
               }
             >
