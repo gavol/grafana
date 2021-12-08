@@ -497,7 +497,7 @@ export interface DataQueryRequest<TQuery extends DataQuery = DataQuery> {
   timezone: string;
   app: CoreApp | string;
 
-  cacheTimeout?: string;
+  cacheTimeout?: string | null;
   // *** START_OF_CHANGE ***
   intervalPBeast?: string;
   maxPBeast?: number;
