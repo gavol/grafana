@@ -9,10 +9,10 @@ import { DataFrame, DataFrameDTO } from './dataFrame';
 import { RawTimeRange, TimeRange } from './time';
 import { ScopedVars } from './ScopedVars';
 import { CoreApp } from './app';
-import { LiveChannelSupport } from './live';
 import { CustomVariableSupport, DataSourceVariableSupport, StandardVariableSupport } from './variables';
 import { makeClassES5Compatible } from '../utils/makeClassES5Compatible';
 import { DataQuery } from './query';
+import { DataSourceRef } from '.';
 
 export interface DataSourcePluginOptionsEditorProps<JSONData = DataSourceJsonData, SecureJSONData = {}> {
   options: DataSourceSettings<JSONData, SecureJSONData>;
@@ -128,6 +128,7 @@ export interface DataSourcePluginMeta<T extends KeyValue = {}> extends PluginMet
   sort?: number;
   streaming?: boolean;
   unlicensed?: boolean;
+  backend?: boolean;
   isBackend?: boolean;
 }
 
@@ -214,11 +215,8 @@ abstract class DataSourceApi<
     this.name = instanceSettings.name;
     this.id = instanceSettings.id;
     this.type = instanceSettings.type;
-    this.meta = {} as DataSourcePluginMeta;
+    this.meta = instanceSettings.meta;
     this.uid = instanceSettings.uid;
-    if (!this.uid) {
-      this.uid = this.name; // Internal datasources do not have a UID (-- Grafana --)
-    }
   }
 
   /**
@@ -251,6 +249,15 @@ abstract class DataSourceApi<
   abstract testDatasource(): Promise<any>;
 
   /**
+   * Override to skip executing a query
+   *
+   * @returns false if the query should be skipped
+   *
+   * @virtual
+   */
+  filterQuery?(query: TQuery): boolean;
+
+  /**
    *  Get hints for query improvements
    */
   getQueryHints?(query: TQuery, results: any[], ...rest: any): QueryHint[];
@@ -261,12 +268,27 @@ abstract class DataSourceApi<
   getQueryDisplayText?(query: TQuery): string;
 
   /**
-   * Retrieve context for a given log row
+   * @deprecated getLogRowContext and showContextToggle in `DataSourceApi` is deprecated.
+   *
+   * DataSourceWithLogsContextSupport should be implemented instead (these methods have exactly
+   * the same signature in DataSourceWithLogsContextSupport).
+   * This method will be removed from DataSourceApi in the future. Some editors may still show
+   * a deprecation warning which can be ignored for time being.
    */
   getLogRowContext?: <TContextQueryOptions extends {}>(
     row: LogRowModel,
     options?: TContextQueryOptions
   ) => Promise<DataQueryResponse>;
+
+  /**
+   * @deprecated getLogRowContext and showContextToggle in `DataSourceApi` is deprecated.
+   *
+   * DataSourceWithLogsContextSupport should be implemented instead (these methods have exactly
+   * the same signature in DataSourceWithLogsContextSupport).
+   * This method will be removed from DataSourceApi in the future. Some editors may still show
+   * a deprecation warning which can be ignored for time being.
+   */
+  showContextToggle?(row?: LogRowModel): boolean;
 
   /**
    * Variable query action.
@@ -310,14 +332,17 @@ abstract class DataSourceApi<
    */
   getHighlighterExpression?(query: TQuery): string[];
 
+  /** Get an identifier object for this datasource instance */
+  getRef(): DataSourceRef {
+    return { type: this.type, uid: this.uid };
+  }
+
   /**
    * Used in explore
    */
   languageProvider?: any;
 
   getVersion?(optionalOptions?: any): Promise<string>;
-
-  showContextToggle?(row?: LogRowModel): boolean;
 
   interpolateVariablesInQueries?(queries: TQuery[], scopedVars: ScopedVars | {}): TQuery[];
 
@@ -336,15 +361,6 @@ abstract class DataSourceApi<
    * @deprecated -- prefer using {@link AnnotationSupport}
    */
   annotationQuery?(options: AnnotationQueryRequest<TQuery>): Promise<AnnotationEvent[]>;
-
-  /**
-   * Define live streaming behavior within this datasource settings
-   *
-   * Note: `plugin.json` must also define `live: true`
-   *
-   * @alpha -- experimental
-   */
-  channelSupport?: LiveChannelSupport;
 
   /**
    * Defines new variable support
@@ -537,6 +553,7 @@ export interface DataSourceJsonData {
   defaultRegion?: string;
   profile?: string;
   manageAlerts?: boolean;
+  alertmanagerUid?: string;
 }
 
 /**
@@ -595,6 +612,9 @@ export interface DataSourceInstanceSettings<T extends DataSourceJsonData = DataS
    */
   basicAuth?: string;
   withCredentials?: boolean;
+
+  /** When the name+uid are based on template variables, maintain access to the real values */
+  rawRef?: DataSourceRef;
 }
 
 /**
