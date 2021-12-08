@@ -87,8 +87,8 @@ const defaultProps: Props = {
 };
 
 function getSelectors() {
-  const dashboardSelect = () => screen.getByLabelText(/user preferences home dashboard drop down/i);
-  const timepickerSelect = () => screen.getByLabelText(selectors.components.TimeZonePicker.container);
+  const dashboardSelect = () => screen.getByTestId('User preferences home dashboard drop down');
+  const timepickerSelect = () => screen.getByTestId(selectors.components.TimeZonePicker.containerV2);
   const teamsTable = () => screen.getByRole('table', { name: /user teams table/i });
   const orgsTable = () => screen.getByRole('table', { name: /user organizations table/i });
   const sessionsTable = () => screen.getByRole('table', { name: /user sessions table/i });
@@ -235,8 +235,9 @@ describe('UserProfileEditPage', () => {
 
         const { email, saveProfile } = getSelectors();
         userEvent.clear(email());
-        await userEvent.type(email(), 'test@test.se');
-        userEvent.click(saveProfile());
+        userEvent.type(email(), 'test@test.se');
+        // TODO remove skipPointerEventsCheck once https://github.com/jsdom/jsdom/issues/3232 is fixed
+        userEvent.click(saveProfile(), undefined, { skipPointerEventsCheck: true });
 
         await waitFor(() => expect(props.updateUserProfile).toHaveBeenCalledTimes(1));
         expect(props.updateUserProfile).toHaveBeenCalledWith({

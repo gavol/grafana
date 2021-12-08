@@ -9,6 +9,7 @@ import { DashboardModel } from './DashboardModel';
 import {
   DataLink,
   DataLinkBuiltInVars,
+  DataSourceRef,
   MappingType,
   SpecialValueMatch,
   PanelPlugin,
@@ -22,6 +23,8 @@ import {
   DataTransformerConfig,
   AnnotationQuery,
   DataQuery,
+  getDataSourceRef,
+  isDataSourceRef,
 } from '@grafana/data';
 // Constants
 import {
@@ -39,11 +42,13 @@ import { config } from 'app/core/config';
 import { plugin as statPanelPlugin } from 'app/plugins/panel/stat/module';
 import { plugin as gaugePanelPlugin } from 'app/plugins/panel/gauge/module';
 import { getStandardFieldConfigs, getStandardOptionEditors } from '@grafana/ui';
+import { getDataSourceSrv } from '@grafana/runtime';
 import { labelsToFieldsTransformer } from '../../../../../packages/grafana-data/src/transformations/transformers/labelsToFields';
 import { mergeTransformer } from '../../../../../packages/grafana-data/src/transformations/transformers/merge';
 import {
   migrateMultipleStatsMetricsQuery,
   migrateMultipleStatsAnnotationQuery,
+  migrateCloudWatchQuery,
 } from 'app/plugins/datasource/cloudwatch/migrations';
 import { CloudWatchMetricsQuery, CloudWatchAnnotationQuery } from 'app/plugins/datasource/cloudwatch/types';
 
@@ -62,7 +67,7 @@ export class DashboardMigrator {
     let i, j, k, n;
     const oldVersion = this.dashboard.schemaVersion;
     const panelUpgrades: PanelSchemeUpgradeHandler[] = [];
-    this.dashboard.schemaVersion = 32;
+    this.dashboard.schemaVersion = 33;
 
     if (oldVersion === this.dashboard.schemaVersion) {
       return;
@@ -695,6 +700,33 @@ export class DashboardMigrator {
       this.migrateCloudWatchAnnotationQuery();
     }
 
+    // Replace datasource name with reference, uid and type
+    if (oldVersion < 33) {
+      for (const variable of this.dashboard.templating.list) {
+        if (variable.type !== 'query') {
+          continue;
+        }
+        variable.datasource = migrateDatasourceNameToRef(variable.datasource);
+      }
+
+      panelUpgrades.push((panel) => {
+        panel.datasource = migrateDatasourceNameToRef(panel.datasource);
+
+        if (!panel.targets) {
+          return panel;
+        }
+
+        for (const target of panel.targets) {
+          const targetRef = migrateDatasourceNameToRef(target.datasource);
+          if (targetRef != null) {
+            target.datasource = targetRef;
+          }
+        }
+
+        return panel;
+      });
+    }
+
     if (panelUpgrades.length === 0) {
       return;
     }
@@ -716,10 +748,14 @@ export class DashboardMigrator {
   // New queries, that were created during migration, are put at the end of the array.
   migrateCloudWatchQueries(panel: PanelModel) {
     for (const target of panel.targets || []) {
-      if (isLegacyCloudWatchQuery(target)) {
-        const newQueries = migrateMultipleStatsMetricsQuery(target, [...panel.targets]);
-        for (const newQuery of newQueries) {
-          panel.targets.push(newQuery);
+      if (isCloudWatchQuery(target)) {
+        migrateCloudWatchQuery(target);
+        if (target.hasOwnProperty('statistics')) {
+          // New queries, that were created during migration, are put at the end of the array.
+          const newQueries = migrateMultipleStatsMetricsQuery(target, [...panel.targets]);
+          for (const newQuery of newQueries) {
+            panel.targets.push(newQuery);
+          }
         }
       }
     }
@@ -1009,6 +1045,23 @@ function migrateSinglestat(panel: PanelModel) {
   return panel;
 }
 
+export function migrateDatasourceNameToRef(nameOrRef?: string | DataSourceRef | null): DataSourceRef | null {
+  if (nameOrRef == null || nameOrRef === 'default') {
+    return null;
+  }
+
+  if (isDataSourceRef(nameOrRef)) {
+    return nameOrRef;
+  }
+
+  const ds = getDataSourceSrv().getInstanceSettings(nameOrRef);
+  if (!ds) {
+    return { uid: nameOrRef as string }; // not found
+  }
+
+  return getDataSourceRef(ds);
+}
+
 // mutates transformations appending a new transformer after the existing one
 function appendTransformerAfter(panel: PanelModel, id: string, cfg: DataTransformerConfig) {
   if (panel.transformations) {
@@ -1030,7 +1083,7 @@ function upgradeValueMappingsForPanel(panel: PanelModel) {
     return panel;
   }
 
-  if (fieldConfig.defaults) {
+  if (fieldConfig.defaults && fieldConfig.defaults.mappings) {
     fieldConfig.defaults.mappings = upgradeValueMappings(
       fieldConfig.defaults.mappings,
       fieldConfig.defaults.thresholds
@@ -1051,12 +1104,13 @@ function upgradeValueMappingsForPanel(panel: PanelModel) {
   return panel;
 }
 
-function isLegacyCloudWatchQuery(target: DataQuery): target is CloudWatchMetricsQuery {
+function isCloudWatchQuery(target: DataQuery): target is CloudWatchMetricsQuery {
   return (
     target.hasOwnProperty('dimensions') &&
     target.hasOwnProperty('namespace') &&
     target.hasOwnProperty('region') &&
-    target.hasOwnProperty('statistics')
+    target.hasOwnProperty('period') &&
+    target.hasOwnProperty('metricName')
   );
 }
 

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	ngmodels "github.com/grafana/grafana/pkg/services/ngalert/models"
 	"github.com/grafana/grafana/pkg/util"
 )
 
@@ -79,8 +80,8 @@ func addMigrationInfo(da *dashAlert) (map[string]string, map[string]string) {
 	}
 
 	annotations := make(map[string]string, 3)
-	annotations["__dashboardUid__"] = da.DashboardUID
-	annotations["__panelId__"] = fmt.Sprintf("%v", da.PanelId)
+	annotations[ngmodels.DashboardUIDAnnotation] = da.DashboardUID
+	annotations[ngmodels.PanelIDAnnotation] = fmt.Sprintf("%v", da.PanelId)
 	annotations["__alertId__"] = fmt.Sprintf("%v", da.Id)
 
 	return lbls, annotations
@@ -128,6 +129,10 @@ func (m *migration) makeAlertRule(cond condition, da dashAlert, folderUID string
 
 	if err := m.addSilence(da, ar); err != nil {
 		m.mg.Logger.Error("alert migration error: failed to create silence", "rule_name", ar.Title, "err", err)
+	}
+
+	if err := m.addErrorSilence(da, ar); err != nil {
+		m.mg.Logger.Error("alert migration error: failed to create silence for Error", "rule_name", ar.Title, "err", err)
 	}
 
 	if err := m.addNoDataSilence(da, ar); err != nil {
@@ -214,7 +219,9 @@ func transExecErr(s string) (string, error) {
 	case "", "alerting":
 		return "Alerting", nil
 	case "keep_state":
-		return "Alerting", nil
+		// Keep last state is translated to error as we now emit a
+		// DatasourceError alert when the state is error
+		return "Error", nil
 	}
 	return "", fmt.Errorf("unrecognized Execution Error setting %v", s)
 }

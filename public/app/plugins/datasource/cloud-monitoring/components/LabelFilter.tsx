@@ -1,10 +1,10 @@
 import React, { FunctionComponent, useCallback, useMemo } from 'react';
 import { flatten } from 'lodash';
 
-import { SelectableValue } from '@grafana/data';
+import { SelectableValue, toOption } from '@grafana/data';
 import { CustomControlProps } from '@grafana/ui/src/components/Select/types';
 import { Button, HorizontalGroup, Select, VerticalGroup } from '@grafana/ui';
-import { labelsToGroupedOptions, stringArrayToFilters, toOption } from '../functions';
+import { labelsToGroupedOptions, stringArrayToFilters } from '../functions';
 import { Filter } from '../types';
 import { SELECT_WIDTH } from '../constants';
 import { QueryEditorRow } from '.';
@@ -20,14 +20,14 @@ const operators = ['=', '!=', '=~', '!=~'];
 
 const FilterButton = React.forwardRef<HTMLButtonElement, CustomControlProps<string>>(
   ({ value, isOpen, invalid, ...rest }, ref) => {
-    return <Button ref={ref} {...rest} variant="secondary" icon="plus"></Button>;
+    return <Button {...rest} ref={ref} variant="secondary" icon="plus"></Button>;
   }
 );
 FilterButton.displayName = 'FilterButton';
 
 const OperatorButton = React.forwardRef<HTMLButtonElement, CustomControlProps<string>>(({ value, ...rest }, ref) => {
   return (
-    <Button ref={ref} {...rest} variant="secondary">
+    <Button {...rest} ref={ref} variant="secondary">
       <span className="query-segment-operator">{value?.label}</span>
     </Button>
   );

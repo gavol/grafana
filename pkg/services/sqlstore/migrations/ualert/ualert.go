@@ -1,6 +1,7 @@
 package ualert
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -9,8 +10,12 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/grafana/grafana/pkg/setting"
+
+	ngmodels "github.com/grafana/grafana/pkg/services/ngalert/models"
 	"github.com/grafana/grafana/pkg/services/ngalert/notifier/channels"
 	"github.com/grafana/grafana/pkg/services/sqlstore/migrator"
+	"github.com/grafana/grafana/pkg/util"
 
 	pb "github.com/prometheus/alertmanager/silence/silencepb"
 	"xorm.io/xorm"
@@ -45,14 +50,14 @@ func (e *MigrationError) Unwrap() error { return e.Err }
 func AddDashAlertMigration(mg *migrator.Migrator) {
 	logs, err := mg.GetMigrationLog()
 	if err != nil {
-		mg.Logger.Crit("alert migration failure: could not get migration log", "error", err)
+		mg.Logger.Error("alert migration failure: could not get migration log", "error", err)
 		os.Exit(1)
 	}
 
 	_, migrationRun := logs[migTitle]
 
 	switch {
-	case mg.Cfg.UnifiedAlerting.Enabled && !migrationRun:
+	case mg.Cfg.UnifiedAlerting.IsEnabled() && !migrationRun:
 		// Remove the migration entry that removes all unified alerting data. This is so when the feature
 		// flag is removed in future the "remove unified alerting data" migration will be run again.
 		mg.AddMigration(fmt.Sprintf(clearMigrationEntryTitle, rmMigTitle), &clearMigrationEntry{
@@ -67,7 +72,7 @@ func AddDashAlertMigration(mg *migrator.Migrator) {
 			portedChannelGroupsPerOrg: make(map[int64]map[string]string),
 			silences:                  make(map[int64][]*pb.MeshSilence),
 		})
-	case !mg.Cfg.UnifiedAlerting.Enabled && migrationRun:
+	case !mg.Cfg.UnifiedAlerting.IsEnabled() && migrationRun:
 		// Remove the migration entry that creates unified alerting data. This is so when the feature
 		// flag is enabled in the future the migration "move dashboard alerts to unified alerting" will be run again.
 		mg.AddMigration(fmt.Sprintf(clearMigrationEntryTitle, migTitle), &clearMigrationEntry{
@@ -85,14 +90,14 @@ func AddDashAlertMigration(mg *migrator.Migrator) {
 func RerunDashAlertMigration(mg *migrator.Migrator) {
 	logs, err := mg.GetMigrationLog()
 	if err != nil {
-		mg.Logger.Crit("alert migration failure: could not get migration log", "error", err)
+		mg.Logger.Error("alert migration failure: could not get migration log", "error", err)
 		os.Exit(1)
 	}
 
 	cloneMigTitle := fmt.Sprintf("clone %s", migTitle)
 
 	_, migrationRun := logs[cloneMigTitle]
-	ngEnabled := mg.Cfg.UnifiedAlerting.Enabled
+	ngEnabled := mg.Cfg.UnifiedAlerting.IsEnabled()
 
 	switch {
 	case ngEnabled && !migrationRun:
@@ -106,13 +111,13 @@ func RerunDashAlertMigration(mg *migrator.Migrator) {
 func AddDashboardUIDPanelIDMigration(mg *migrator.Migrator) {
 	logs, err := mg.GetMigrationLog()
 	if err != nil {
-		mg.Logger.Crit("alert migration failure: could not get migration log", "error", err)
+		mg.Logger.Error("alert migration failure: could not get migration log", "error", err)
 		os.Exit(1)
 	}
 
 	migrationID := "update dashboard_uid and panel_id from existing annotations"
 	_, migrationRun := logs[migrationID]
-	ngEnabled := mg.Cfg.UnifiedAlerting.Enabled
+	ngEnabled := mg.Cfg.UnifiedAlerting.IsEnabled()
 	undoMigrationID := "undo " + migrationID
 
 	if ngEnabled && !migrationRun {
@@ -150,13 +155,13 @@ func (m *updateDashboardUIDPanelIDMigration) Exec(sess *xorm.Session, mg *migrat
 			dashboardUID *string
 			panelID      *int64
 		)
-		if s, ok := next.Annotations["__dashboardUid__"]; ok {
+		if s, ok := next.Annotations[ngmodels.DashboardUIDAnnotation]; ok {
 			dashboardUID = &s
 		}
-		if s, ok := next.Annotations["__panelId__"]; ok {
+		if s, ok := next.Annotations[ngmodels.PanelIDAnnotation]; ok {
 			i, err := strconv.ParseInt(s, 10, 64)
 			if err != nil {
-				return fmt.Errorf("the __panelId__ annotation does not contain a valid Panel ID: %w", err)
+				return fmt.Errorf("the %s annotation does not contain a valid Panel ID: %w", ngmodels.PanelIDAnnotation, err)
 			}
 			panelID = &i
 		}
@@ -445,6 +450,7 @@ func (m *migration) validateAlertmanagerConfig(orgID int64, config *PostableUser
 			var (
 				cfg = &channels.NotificationChannelConfig{
 					UID:                   gr.UID,
+					OrgID:                 orgID,
 					Name:                  gr.Name,
 					Type:                  gr.Type,
 					DisableResolveMessage: gr.DisableResolveMessage,
@@ -454,17 +460,31 @@ func (m *migration) validateAlertmanagerConfig(orgID int64, config *PostableUser
 				err error
 			)
 
+			// decryptFunc represents the legacy way of decrypting data. Before the migration, we don't need any new way,
+			// given that the previous alerting will never support it.
+			decryptFunc := func(_ context.Context, sjd map[string][]byte, key string, fallback string) string {
+				if value, ok := sjd[key]; ok {
+					decryptedData, err := util.Decrypt(value, setting.SecretKey)
+					if err != nil {
+						m.mg.Logger.Warn("unable to decrypt key '%s' for %s receiver with uid %s, returning fallback.", key, gr.Type, gr.UID)
+						return fallback
+					}
+					return string(decryptedData)
+				}
+				return fallback
+			}
+
 			switch gr.Type {
 			case "email":
 				_, err = channels.NewEmailNotifier(cfg, nil) // Email notifier already has a default template.
 			case "pagerduty":
-				_, err = channels.NewPagerdutyNotifier(cfg, nil)
+				_, err = channels.NewPagerdutyNotifier(cfg, nil, decryptFunc)
 			case "pushover":
-				_, err = channels.NewPushoverNotifier(cfg, nil)
+				_, err = channels.NewPushoverNotifier(cfg, nil, decryptFunc)
 			case "slack":
-				_, err = channels.NewSlackNotifier(cfg, nil)
+				_, err = channels.NewSlackNotifier(cfg, nil, decryptFunc)
 			case "telegram":
-				_, err = channels.NewTelegramNotifier(cfg, nil)
+				_, err = channels.NewTelegramNotifier(cfg, nil, decryptFunc)
 			case "victorops":
 				_, err = channels.NewVictoropsNotifier(cfg, nil)
 			case "teams":
@@ -474,21 +494,21 @@ func (m *migration) validateAlertmanagerConfig(orgID int64, config *PostableUser
 			case "kafka":
 				_, err = channels.NewKafkaNotifier(cfg, nil)
 			case "webhook":
-				_, err = channels.NewWebHookNotifier(cfg, nil)
+				_, err = channels.NewWebHookNotifier(cfg, nil, decryptFunc)
 			case "sensugo":
-				_, err = channels.NewSensuGoNotifier(cfg, nil)
+				_, err = channels.NewSensuGoNotifier(cfg, nil, decryptFunc)
 			case "discord":
 				_, err = channels.NewDiscordNotifier(cfg, nil)
 			case "googlechat":
 				_, err = channels.NewGoogleChatNotifier(cfg, nil)
 			case "LINE":
-				_, err = channels.NewLineNotifier(cfg, nil)
+				_, err = channels.NewLineNotifier(cfg, nil, decryptFunc)
 			case "threema":
-				_, err = channels.NewThreemaNotifier(cfg, nil)
+				_, err = channels.NewThreemaNotifier(cfg, nil, decryptFunc)
 			case "opsgenie":
-				_, err = channels.NewOpsgenieNotifier(cfg, nil)
+				_, err = channels.NewOpsgenieNotifier(cfg, nil, decryptFunc)
 			case "prometheus-alertmanager":
-				_, err = channels.NewAlertmanagerNotifier(cfg, nil)
+				_, err = channels.NewAlertmanagerNotifier(cfg, nil, decryptFunc)
 			default:
 				return fmt.Errorf("notifier %s is not supported", gr.Type)
 			}
@@ -717,4 +737,46 @@ func (u *upgradeNgAlerting) updateAlertmanagerFiles(orgId int64, migrator *migra
 
 func (u *upgradeNgAlerting) SQL(migrator.Dialect) string {
 	return "code migration"
+}
+
+// CheckUnifiedAlertingEnabledByDefault determines the final status of unified alerting, if it is not enabled explicitly.
+// Checks table `alert` and if it is empty, then it changes UnifiedAlerting.Enabled to true. Otherwise, it sets the flag to false.
+// After this method is executed the status of alerting should be determined, i.e. both flags will not be nil.
+// Note: this is not a real migration but a step that other migrations depend on.
+// TODO Delete when unified alerting is enabled by default unconditionally (Grafana v9)
+func CheckUnifiedAlertingEnabledByDefault(migrator *migrator.Migrator) error {
+	// if [unified_alerting][enabled] is explicitly set, we've got nothing to do here.
+	if migrator.Cfg.UnifiedAlerting.Enabled != nil {
+		return nil
+	}
+	var ualertEnabled bool
+	// this duplicates the logic in setting.ReadUnifiedAlertingSettings, and is put here just for logical completeness.
+	if setting.AlertingEnabled != nil && !*setting.AlertingEnabled {
+		ualertEnabled = true
+		migrator.Cfg.UnifiedAlerting.Enabled = &ualertEnabled
+		migrator.Logger.Debug("Unified alerting is enabled because the legacy is disabled explicitly")
+		return nil
+	}
+
+	resp := &struct {
+		Count int64
+	}{}
+	exist, err := migrator.DBEngine.IsTableExist("alert")
+	if err != nil {
+		return fmt.Errorf("failed to verify if the 'alert' table exists: %w", err)
+	}
+	if exist {
+		if _, err := migrator.DBEngine.SQL("SELECT COUNT(1) as count FROM alert").Get(resp); err != nil {
+			return fmt.Errorf("failed to read 'alert' table: %w", err)
+		}
+	}
+	// if table does not exist then we treat it as absence of legacy alerting and therefore enable unified alerting.
+
+	ualertEnabled = resp.Count == 0
+	legacyEnabled := !ualertEnabled
+	migrator.Cfg.UnifiedAlerting.Enabled = &ualertEnabled
+	setting.AlertingEnabled = &legacyEnabled
+
+	migrator.Logger.Debug(fmt.Sprintf("Found %d legacy alerts in the database. Unified alerting enabled is %v", resp.Count, ualertEnabled))
+	return nil
 }

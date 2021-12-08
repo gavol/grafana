@@ -1,17 +1,19 @@
 import React, { ReactNode } from 'react';
 import { css, cx } from '@emotion/css';
-import { GrafanaTheme2, NavModelItem, textUtil } from '@grafana/data';
+import { GrafanaTheme2, NavModelItem } from '@grafana/data';
 import { Link, useTheme2 } from '@grafana/ui';
 import NavBarDropdown from './NavBarDropdown';
 
 export interface Props {
   isActive?: boolean;
   children: ReactNode;
+  className?: string;
   label: string;
   menuItems?: NavModelItem[];
   menuSubTitle?: string;
   onClick?: () => void;
   reverseMenuDirection?: boolean;
+  showMenu?: boolean;
   target?: HTMLAnchorElement['target'];
   url?: string;
 }
@@ -19,11 +21,13 @@ export interface Props {
 const NavBarItem = ({
   isActive = false,
   children,
+  className,
   label,
   menuItems = [],
   menuSubTitle,
   onClick,
   reverseMenuDirection = false,
+  showMenu = true,
   target,
   url,
 }: Props) => {
@@ -34,14 +38,13 @@ const NavBarItem = ({
       <span className={styles.icon}>{children}</span>
     </button>
   );
-  const sanitizedUrl = textUtil.sanitizeAngularInterpolation(url ?? '');
 
   if (url) {
     element =
-      !target && sanitizedUrl.startsWith('/') ? (
+      !target && url.startsWith('/') ? (
         <Link
           className={styles.element}
-          href={sanitizedUrl}
+          href={url}
           target={target}
           aria-label={label}
           onClick={onClick}
@@ -50,24 +53,26 @@ const NavBarItem = ({
           <span className={styles.icon}>{children}</span>
         </Link>
       ) : (
-        <a href={sanitizedUrl} target={target} className={styles.element} onClick={onClick} aria-label={label}>
+        <a href={url} target={target} className={styles.element} onClick={onClick} aria-label={label}>
           <span className={styles.icon}>{children}</span>
         </a>
       );
   }
 
   return (
-    <div className={cx(styles.container, 'dropdown', { dropup: reverseMenuDirection })}>
+    <div className={cx(styles.container, className)}>
       {element}
-      <NavBarDropdown
-        headerTarget={target}
-        headerText={label}
-        headerUrl={sanitizedUrl}
-        items={menuItems}
-        onHeaderClick={onClick}
-        reverseDirection={reverseMenuDirection}
-        subtitleText={menuSubTitle}
-      />
+      {showMenu && (
+        <NavBarDropdown
+          headerTarget={target}
+          headerText={label}
+          headerUrl={url}
+          items={menuItems}
+          onHeaderClick={onClick}
+          reverseDirection={reverseMenuDirection}
+          subtitleText={menuSubTitle}
+        />
+      )}
     </div>
   );
 };
@@ -77,39 +82,16 @@ export default NavBarItem;
 const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive']) => ({
   container: css`
     position: relative;
+    color: ${isActive ? theme.colors.text.primary : theme.colors.text.secondary};
 
-    @keyframes dropdown-anim {
-      0% {
-        opacity: 0;
-      }
-      100% {
+    &:hover {
+      background-color: ${theme.colors.action.hover};
+      color: ${theme.colors.text.primary};
+
+      // TODO don't use a hardcoded class here, use isVisible in NavBarDropdown
+      .navbar-dropdown {
         opacity: 1;
-      }
-    }
-
-    ${theme.breakpoints.up('md')} {
-      color: ${isActive ? theme.colors.text.primary : theme.colors.text.secondary};
-
-      &:hover {
-        background-color: ${theme.colors.action.hover};
-        color: ${theme.colors.text.primary};
-
-        .dropdown-menu {
-          animation: dropdown-anim 150ms ease-in-out 100ms forwards;
-          border: none;
-          display: flex;
-          // important to overlap it otherwise it can be hidden
-          // again by the mouse getting outside the hover space
-          left: ${theme.components.sidemenu.width - 1}px;
-          margin: 0;
-          opacity: 0;
-          top: 0;
-          z-index: ${theme.zIndex.sidemenu};
-        }
-
-        &.dropup .dropdown-menu {
-          top: auto;
-        }
+        visibility: visible;
       }
     }
   `,
@@ -118,9 +100,10 @@ const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive']) => ({
     border: none;
     color: inherit;
     display: block;
-    line-height: 42px;
+    line-height: ${theme.components.sidemenu.width}px;
+    padding: 0;
     text-align: center;
-    width: ${theme.components.sidemenu.width - 1}px;
+    width: ${theme.components.sidemenu.width}px;
 
     &::before {
       display: ${isActive ? 'block' : 'none'};
@@ -142,10 +125,6 @@ const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive']) => ({
       outline-offset: -2px;
       transition: none;
     }
-
-    .sidemenu-open--xs & {
-      display: none;
-    }
   `,
   icon: css`
     height: 100%;
@@ -153,8 +132,8 @@ const getStyles = (theme: GrafanaTheme2, isActive: Props['isActive']) => ({
 
     img {
       border-radius: 50%;
-      height: 28px;
-      width: 28px;
+      height: ${theme.spacing(3)};
+      width: ${theme.spacing(3)};
     }
   `,
 });

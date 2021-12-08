@@ -1,9 +1,9 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { render, screen } from '@testing-library/react';
-import { UnthemedDashboardPage, Props } from './DashboardPage';
+import { Props, UnthemedDashboardPage } from './DashboardPage';
 import { Router } from 'react-router-dom';
-import { locationService } from '@grafana/runtime';
+import { locationService, setDataSourceSrv } from '@grafana/runtime';
 import { DashboardModel } from '../state';
 import { configureStore } from '../../../store/configureStore';
 import { mockToolkitActionCreator } from 'test/core/redux/mocks';
@@ -22,6 +22,12 @@ jest.mock('app/features/dashboard/components/DashboardSettings/GeneralSettings',
   }
 
   return { GeneralSettings };
+});
+
+jest.mock('app/features/query/components/QueryGroup', () => {
+  return {
+    QueryGroup: () => null,
+  };
 });
 
 jest.mock('app/core/core', () => ({
@@ -202,6 +208,12 @@ describe('DashboardPage', () => {
   });
 
   dashboardPageScenario('When going into edit mode', (ctx) => {
+    setDataSourceSrv({
+      get: jest.fn().mockResolvedValue({}),
+      getInstanceSettings: jest.fn().mockReturnValue({ meta: {} }),
+      getList: jest.fn(),
+    });
+
     ctx.setup(() => {
       ctx.mount({
         dashboard: getTestDashboard(),
@@ -260,7 +272,7 @@ describe('DashboardPage', () => {
     });
 
     it('should render dashboard page toolbar and submenu', () => {
-      expect(screen.queryAllByLabelText(selectors.pages.Dashboard.DashNav.nav)).toHaveLength(1);
+      expect(screen.queryAllByTestId(selectors.pages.Dashboard.DashNav.navV2)).toHaveLength(1);
       expect(screen.queryAllByLabelText(selectors.pages.Dashboard.SubMenu.submenu)).toHaveLength(1);
     });
   });
@@ -275,7 +287,7 @@ describe('DashboardPage', () => {
     });
 
     it('should not render page toolbar and submenu', () => {
-      expect(screen.queryAllByLabelText(selectors.pages.Dashboard.DashNav.nav)).toHaveLength(0);
+      expect(screen.queryAllByTestId(selectors.pages.Dashboard.DashNav.navV2)).toHaveLength(0);
       expect(screen.queryAllByLabelText(selectors.pages.Dashboard.SubMenu.submenu)).toHaveLength(0);
     });
   });

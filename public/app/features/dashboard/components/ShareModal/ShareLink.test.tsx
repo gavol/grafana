@@ -2,10 +2,11 @@ import React from 'react';
 import { shallow, ShallowWrapper } from 'enzyme';
 import { setTemplateSrv } from '@grafana/runtime';
 import config from 'app/core/config';
-import { ShareLink, Props, State } from './ShareLink';
+import { Props, ShareLink, State } from './ShareLink';
 import { initTemplateSrv } from '../../../../../test/helpers/initTemplateSrv';
 import { variableAdapters } from '../../../variables/adapters';
 import { createQueryVariableAdapter } from '../../../variables/query/adapter';
+import { PanelModel } from '../../state';
 import { getDefaultTimeRange } from '@grafana/data';
 
 jest.mock('app/features/dashboard/services/TimeSrv', () => ({
@@ -110,7 +111,7 @@ describe('ShareModal', () => {
         },
       };
       ctx.mount({
-        panel: { id: 22, options: {}, fieldConfig: { defaults: {}, overrides: [] } },
+        panel: new PanelModel({ id: 22, options: {}, fieldConfig: { defaults: {}, overrides: [] } }),
       });
     });
 
@@ -123,7 +124,7 @@ describe('ShareModal', () => {
     it('should generate render url', async () => {
       mockLocationHref('http://dashboards.grafana.com/d/abcdefghi/my-dash');
       ctx.mount({
-        panel: { id: 22, options: {}, fieldConfig: { defaults: {}, overrides: [] } },
+        panel: new PanelModel({ id: 22, options: {}, fieldConfig: { defaults: {}, overrides: [] } }),
       });
 
       await ctx.wrapper?.instance().buildUrl();
@@ -136,7 +137,7 @@ describe('ShareModal', () => {
     it('should generate render url for scripted dashboard', async () => {
       mockLocationHref('http://dashboards.grafana.com/dashboard/script/my-dash.js');
       ctx.mount({
-        panel: { id: 22, options: {}, fieldConfig: { defaults: {}, overrides: [] } },
+        panel: new PanelModel({ id: 22, options: {}, fieldConfig: { defaults: {}, overrides: [] } }),
       });
 
       await ctx.wrapper?.instance().buildUrl();
@@ -168,7 +169,7 @@ describe('ShareModal', () => {
     it('should remove editPanel from image url when is first param in querystring', async () => {
       mockLocationHref('http://server/#!/test?editPanel=1');
       ctx.mount({
-        panel: { id: 1, options: {}, fieldConfig: { defaults: {}, overrides: [] } },
+        panel: new PanelModel({ id: 1, options: {}, fieldConfig: { defaults: {}, overrides: [] } }),
       });
 
       await ctx.wrapper?.instance().buildUrl();

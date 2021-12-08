@@ -12,8 +12,7 @@ import {
 } from '@grafana/data';
 import { DashboardChangedModal } from './DashboardChangedModal';
 import { DashboardEvent, DashboardEventAction } from './types';
-import { CoreGrafanaLiveFeature } from '../scopes';
-import { sessionId } from '../live';
+import { sessionId } from 'app/features/live';
 import { ShowModalReactEvent } from '../../../types/events';
 import { Unsubscribable } from 'rxjs';
 
@@ -63,7 +62,7 @@ class DashboardWatcher {
       };
       this.leave();
       if (uid) {
-        this.subscription = live.getStream(this.channel).subscribe(this.observer);
+        this.subscription = live.getStream<DashboardEvent>(this.channel).subscribe(this.observer);
       }
       this.uid = uid;
     }
@@ -159,16 +158,3 @@ class DashboardWatcher {
 }
 
 export const dashboardWatcher = new DashboardWatcher();
-
-export function getDashboardChannelsFeature(): CoreGrafanaLiveFeature {
-  return {
-    name: 'dashboard',
-    support: {
-      getChannelConfig: (path: string) => ({
-        description: 'Dashboard change events',
-        hasPresence: true,
-      }),
-    },
-    description: 'Dashboard listener',
-  };
-}
