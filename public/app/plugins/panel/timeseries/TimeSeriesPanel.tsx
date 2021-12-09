@@ -47,7 +47,7 @@ export const TimeSeriesPanel: React.FC<TimeSeriesPanelProps> = ({
                   // The "low" and "high" series must have the same visibility and Y-axis of the
                   // corresponding main series
                   mainSeries[sName]['viz'] = f.config.custom.hideFrom['viz'];
-                  mainSeries[sName]['axisPlacement'] = f.config.custom.['axisPlacement'];
+                  mainSeries[sName]['axisPlacement'] = f.config.custom['axisPlacement'];
               }
           }
       }
