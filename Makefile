@@ -13,7 +13,7 @@ GO = go
 GO_FILES ?= ./pkg/...
 SH_FILES ?= $(shell find ./scripts -name *.sh)
 
-all: deps build
+all: gen-go deps build
 
 ##@ Dependencies
 
