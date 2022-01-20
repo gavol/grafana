@@ -7,7 +7,7 @@ load(
 load('scripts/drone/vault.star', 'from_secret', 'github_token', 'pull_secret', 'drone_token')
 
 def pipeline(
-    name, edition, trigger, steps, services=[], platform='linux', depends_on=[],
+    name, edition, trigger, steps, services=[], platform='linux', depends_on=[], environment=None, volumes=[],
     ):
     if platform != 'windows':
         platform_conf = {
@@ -38,9 +38,6 @@ def pipeline(
         'services': services,
         'steps': steps,
         'volumes': [{
-            'name': 'cypress_cache',
-            'temp': {},
-        },{
             'name': 'docker',
             'host': {
                 'path': '/var/run/docker.sock',
@@ -48,6 +45,12 @@ def pipeline(
         }],
         'depends_on': depends_on,
     }
+    if environment:
+        pipeline.update({
+            'environment': environment,
+        })
+
+    pipeline['volumes'].extend(volumes)
     pipeline.update(platform_conf)
 
     if edition in ('enterprise', 'enterprise2'):

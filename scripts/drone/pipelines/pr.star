@@ -14,7 +14,6 @@ load(
     'test_backend_integration_step',
     'test_frontend_step',
     'package_step',
-    'install_cypress_step',
     'e2e_tests_server_step',
     'e2e_tests_step',
     'build_storybook_step',
@@ -35,6 +34,7 @@ load(
 load(
     'scripts/drone/services/services.star',
     'integration_test_services',
+    'integration_test_services_volumes',
     'ldap_service',
 )
 
@@ -48,6 +48,7 @@ ver_mode = 'pr'
 
 def pr_pipelines(edition):
     services = integration_test_services(edition)
+    volumes = integration_test_services_volumes()
     variants = ['linux-x64', 'linux-x64-musl', 'osx64', 'win64', 'armv6',]
     include_enterprise2 = edition == 'enterprise'
     test_steps = [
@@ -88,7 +89,6 @@ def pr_pipelines(edition):
     # Insert remaining build_steps
     build_steps.extend([
         package_step(edition=edition, ver_mode=ver_mode, include_enterprise2=include_enterprise2, variants=variants),
-        install_cypress_step(),
         e2e_tests_server_step(edition=edition),
         e2e_tests_step('dashboards-suite', edition=edition),
         e2e_tests_step('smoke-tests-suite', edition=edition),
@@ -123,6 +123,8 @@ def pr_pipelines(edition):
             name='pr-build-e2e', edition=edition, trigger=trigger, services=[], steps=[download_grabpl_step()] + initialize_step(edition, platform='linux', ver_mode=ver_mode)
                 + build_steps,
         ), pipeline(
-            name='pr-integration-tests', edition=edition, trigger=trigger, services=services, steps=[download_grabpl_step()] + initialize_step(edition, platform='linux', ver_mode=ver_mode) + integration_test_steps,
+            name='pr-integration-tests', edition=edition, trigger=trigger, services=services,
+            steps=[download_grabpl_step()] + initialize_step(edition, platform='linux', ver_mode=ver_mode) + integration_test_steps,
+            volumes=volumes,
         ),
     ]
