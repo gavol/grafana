@@ -5,7 +5,7 @@ import { createQueryVariableAdapter } from './adapter';
 import { reduxTester } from '../../../../test/core/redux/reduxTester';
 import { getRootReducer, RootReducerType } from '../state/helpers';
 import { QueryVariableModel, VariableHide, VariableRefresh, VariableSort } from '../types';
-import { ALL_VARIABLE_TEXT, ALL_VARIABLE_VALUE, toVariablePayload } from '../state/types';
+import { toVariablePayload } from '../state/types';
 import {
   addVariable,
   changeVariableProp,
@@ -38,6 +38,7 @@ import { getTimeSrv, setTimeSrv, TimeSrv } from '../../dashboard/services/TimeSr
 import { setVariableQueryRunner, VariableQueryRunner } from './VariableQueryRunner';
 import { setDataSourceSrv } from '@grafana/runtime';
 import { variablesInitTransaction } from '../state/transactionReducer';
+import { ALL_VARIABLE_TEXT, ALL_VARIABLE_VALUE } from '../constants';
 
 const mocks: Record<string, any> = {
   datasource: {
@@ -67,9 +68,9 @@ describe('query actions', () => {
 
   beforeEach(() => {
     originalTimeSrv = getTimeSrv();
-    setTimeSrv(({
+    setTimeSrv({
       timeRange: jest.fn().mockReturnValue(getDefaultTimeRange()),
-    } as unknown) as TimeSrv);
+    } as unknown as TimeSrv);
     setVariableQueryRunner(new VariableQueryRunner());
   });
 
@@ -268,7 +269,7 @@ describe('query actions', () => {
   describe('when initQueryVariableEditor is dispatched and metricsource without value is available', () => {
     it('then correct actions are dispatched', async () => {
       const variable = createVariable({ includeAll: true });
-      const testMetricSource = { name: 'test', value: (null as unknown) as string, meta: {} };
+      const testMetricSource = { name: 'test', value: null as unknown as string, meta: {} };
       const editor = {};
 
       mocks.dataSourceSrv.getList = jest.fn().mockReturnValue([testMetricSource]);

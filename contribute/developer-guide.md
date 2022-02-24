@@ -39,6 +39,14 @@ For alternative ways of cloning the Grafana repository, please refer to [GitHub'
 
 **Warning:** Do not use `go get` to download Grafana. Recent versions of Go have added behavior which isn't compatible with the way the Grafana repository is structured.
 
+### Configure Editors
+
+For some IDEs, additional configuration may be needed for Typescript to work with [Yarn plug'n'play](https://yarnpkg.com/features/pnp).
+For [VSCode](https://yarnpkg.com/getting-started/editor-sdks#vscode) and [Vim](https://yarnpkg.com/getting-started/editor-sdks#vim),
+it's as easy as running `yarn dlx @yarnpkg/sdks vscode` or `yarn dlx @yarnpkg/sdks vim`, respectively.
+
+More information can be found [here](https://yarnpkg.com/getting-started/editor-sdks).
+
 ## Build Grafana
 
 Grafana consists of two components; the _frontend_, and the _backend_.
@@ -203,11 +211,6 @@ make build-docker-full
 ```
 
 The resulting image will be tagged as grafana/grafana:dev.
-
-> **Note:** If you've already set up a local development environment, and you're running a `linux/amd64` machine, you can speed up building the Docker image:
-
-1. Build the frontend: `go run build.go build-frontend`.
-1. Build the Docker image: `make build-docker-dev`.
 
 **Note:** If you are using Docker for macOS, be sure to set the memory limit to be larger than 2 GiB. Otherwise, `grunt build` may fail. The memory limit settings are available under **Docker Desktop** -> **Preferences** -> **Advanced**.
 

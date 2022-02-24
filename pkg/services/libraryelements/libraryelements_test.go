@@ -1,8 +1,10 @@
 package libraryelements
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -74,7 +76,8 @@ func TestDeleteLibraryPanelsInFolder(t *testing.T) {
 	scenarioWithPanel(t, "When an admin tries to delete a folder that contains disconnected elements, it should delete all disconnected elements too",
 		func(t *testing.T, sc scenarioContext) {
 			command := getCreateVariableCommand(sc.folder.Id, "query0")
-			resp := sc.service.createHandler(sc.reqContext, command)
+			sc.reqContext.Req.Body = mockRequestBody(command)
+			resp := sc.service.createHandler(sc.reqContext)
 			require.Equal(t, 200, resp.Status())
 
 			resp = sc.service.getAllHandler(sc.reqContext)
@@ -240,7 +243,7 @@ func updateFolderACL(t *testing.T, sqlStore *sqlstore.SQLStore, folderID int64, 
 		})
 	}
 
-	err := sqlStore.UpdateDashboardACL(folderID, aclItems)
+	err := sqlStore.UpdateDashboardACL(context.Background(), folderID, aclItems)
 	require.NoError(t, err)
 }
 
@@ -272,7 +275,8 @@ func scenarioWithPanel(t *testing.T, desc string, fn func(t *testing.T, sc scena
 
 	testScenario(t, desc, func(t *testing.T, sc scenarioContext) {
 		command := getCreatePanelCommand(sc.folder.Id, "Text - Library Panel")
-		resp := sc.service.createHandler(sc.reqContext, command)
+		sc.reqContext.Req.Body = mockRequestBody(command)
+		resp := sc.service.createHandler(sc.reqContext)
 		sc.initialResult = validateAndUnMarshalResponse(t, resp)
 
 		fn(t, sc)
@@ -285,7 +289,11 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 	t.Helper()
 
 	t.Run(desc, func(t *testing.T) {
-		ctx := web.Context{Req: &http.Request{}}
+		ctx := web.Context{Req: &http.Request{
+			Header: http.Header{
+				"Content-Type": []string{"application/json"},
+			},
+		}}
 		orgID := int64(1)
 		role := models.ROLE_ADMIN
 		sqlStore := sqlstore.InitTestDB(t)
@@ -312,6 +320,7 @@ func testScenario(t *testing.T, desc string, fn func(t *testing.T, sc scenarioCo
 			Name:  "User In DB",
 			Login: userInDbName,
 		}
+
 		_, err := sqlStore.CreateUser(context.Background(), cmd)
 		require.NoError(t, err)
 
@@ -338,4 +347,9 @@ func getCompareOptions() []cmp.Option {
 			return in.UTC().Unix()
 		}),
 	}
+}
+
+func mockRequestBody(v interface{}) io.ReadCloser {
+	b, _ := json.Marshal(v)
+	return io.NopCloser(bytes.NewReader(b))
 }

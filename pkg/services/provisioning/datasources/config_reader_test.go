@@ -18,6 +18,7 @@ var (
 
 	twoDatasourcesConfig            = "testdata/two-datasources"
 	twoDatasourcesConfigPurgeOthers = "testdata/insert-two-delete-two"
+	deleteOneDatasource             = "testdata/delete-one"
 	doubleDatasourcesConfig         = "testdata/double-default"
 	allProperties                   = "testdata/all-properties"
 	versionZero                     = "testdata/version-0"
@@ -126,6 +127,27 @@ func TestDatasourceAsConfig(t *testing.T) {
 			require.Equal(t, fakeRepo.inserted[0].OrgId, int64(1))
 			require.True(t, fakeRepo.inserted[2].IsDefault)
 			require.Equal(t, fakeRepo.inserted[2].OrgId, int64(2))
+		})
+	})
+
+	t.Run("Remove one datasource", func(t *testing.T) {
+		setup()
+		t.Run("Remove one datasource", func(t *testing.T) {
+			fakeRepo.loadAll = []*models.DataSource{}
+
+			t.Run("should have removed old datasource", func(t *testing.T) {
+				dc := newDatasourceProvisioner(logger)
+				err := dc.applyChanges(context.Background(), deleteOneDatasource)
+				if err != nil {
+					t.Fatalf("applyChanges return an error %v", err)
+				}
+
+				require.Equal(t, 1, len(fakeRepo.deleted))
+				// should have set OrgID to 1
+				require.Equal(t, fakeRepo.deleted[0].OrgID, int64(1))
+				require.Equal(t, 0, len(fakeRepo.inserted))
+				require.Equal(t, len(fakeRepo.updated), 0)
+			})
 		})
 	})
 
@@ -294,22 +316,22 @@ type fakeRepository struct {
 	loadAll []*models.DataSource
 }
 
-func mockDelete(cmd *models.DeleteDataSourceCommand) error {
+func mockDelete(ctx context.Context, cmd *models.DeleteDataSourceCommand) error {
 	fakeRepo.deleted = append(fakeRepo.deleted, cmd)
 	return nil
 }
 
-func mockUpdate(cmd *models.UpdateDataSourceCommand) error {
+func mockUpdate(ctx context.Context, cmd *models.UpdateDataSourceCommand) error {
 	fakeRepo.updated = append(fakeRepo.updated, cmd)
 	return nil
 }
 
-func mockInsert(cmd *models.AddDataSourceCommand) error {
+func mockInsert(ctx context.Context, cmd *models.AddDataSourceCommand) error {
 	fakeRepo.inserted = append(fakeRepo.inserted, cmd)
 	return nil
 }
 
-func mockGet(cmd *models.GetDataSourceQuery) error {
+func mockGet(ctx context.Context, cmd *models.GetDataSourceQuery) error {
 	for _, v := range fakeRepo.loadAll {
 		if cmd.Name == v.Name && cmd.OrgId == v.OrgId {
 			cmd.Result = v
@@ -320,6 +342,6 @@ func mockGet(cmd *models.GetDataSourceQuery) error {
 	return models.ErrDataSourceNotFound
 }
 
-func mockGetOrg(_ *models.GetOrgByIdQuery) error {
+func mockGetOrg(ctx context.Context, _ *models.GetOrgByIdQuery) error {
 	return nil
 }

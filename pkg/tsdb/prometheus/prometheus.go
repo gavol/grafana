@@ -14,9 +14,9 @@ import (
 	"github.com/grafana/grafana-plugin-sdk-go/backend/instancemgmt"
 	"github.com/grafana/grafana/pkg/infra/httpclient"
 	"github.com/grafana/grafana/pkg/infra/log"
-	"github.com/grafana/grafana/pkg/plugins"
-	"github.com/grafana/grafana/pkg/plugins/backendplugin/coreplugin"
+	"github.com/grafana/grafana/pkg/infra/tracing"
 	"github.com/grafana/grafana/pkg/tsdb/intervalv2"
+	"github.com/grafana/grafana/pkg/util/maputil"
 	apiv1 "github.com/prometheus/client_golang/api/prometheus/v1"
 )
 
@@ -29,31 +29,21 @@ var (
 type Service struct {
 	intervalCalculator intervalv2.Calculator
 	im                 instancemgmt.InstanceManager
+	tracer             tracing.Tracer
 }
 
-func ProvideService(httpClientProvider httpclient.Provider, registrar plugins.CoreBackendRegistrar) (*Service, error) {
+func ProvideService(httpClientProvider httpclient.Provider, tracer tracing.Tracer) *Service {
 	plog.Debug("initializing")
-	im := datasource.NewInstanceManager(newInstanceSettings(httpClientProvider))
-
-	s := &Service{
+	return &Service{
 		intervalCalculator: intervalv2.NewCalculator(),
-		im:                 im,
+		im:                 datasource.NewInstanceManager(newInstanceSettings(httpClientProvider)),
+		tracer:             tracer,
 	}
-
-	factory := coreplugin.New(backend.ServeOpts{
-		QueryDataHandler: s,
-	})
-	if err := registrar.LoadAndRegister("prometheus", factory); err != nil {
-		plog.Error("Failed to register plugin", "error", err)
-		return nil, err
-	}
-
-	return s, nil
 }
 
 func newInstanceSettings(httpClientProvider httpclient.Provider) datasource.InstanceFactoryFunc {
 	return func(settings backend.DataSourceInstanceSettings) (instancemgmt.Instance, error) {
-		var jsonData promclient.JsonData
+		var jsonData map[string]interface{}
 		err := json.Unmarshal(settings.JSONData, &jsonData)
 		if err != nil {
 			return nil, fmt.Errorf("error reading settings: %w", err)
@@ -65,10 +55,15 @@ func newInstanceSettings(httpClientProvider httpclient.Provider) datasource.Inst
 			return nil, err
 		}
 
+		timeInterval, err := maputil.GetStringOptional(jsonData, "timeInterval")
+		if err != nil {
+			return nil, err
+		}
+
 		mdl := DatasourceInfo{
 			ID:           settings.ID,
 			URL:          settings.URL,
-			TimeInterval: jsonData.TimeInterval,
+			TimeInterval: timeInterval,
 			getClient:    pc.GetClient,
 		}
 

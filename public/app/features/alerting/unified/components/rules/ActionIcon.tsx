@@ -27,11 +27,18 @@ export const ActionIcon: FC<Props> = ({
   tooltipPlacement = 'top',
   ...rest
 }) => {
+  const ariaLabel = typeof tooltip === 'string' ? tooltip : undefined;
   const iconEl = (
-    <Icon role="button" className={cx(useStyles(getStyle), className)} onClick={onClick} name={icon} {...rest} />
+    <Icon
+      role="button"
+      className={cx(useStyles(getStyle), className)}
+      onClick={onClick}
+      name={icon}
+      {...rest}
+      aria-label={ariaLabel}
+    />
   );
 
-  const ariaLabel = typeof tooltip === 'string' ? tooltip : undefined;
   return (
     <Tooltip content={tooltip} placement={tooltipPlacement}>
       {to ? (

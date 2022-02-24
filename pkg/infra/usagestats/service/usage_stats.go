@@ -39,7 +39,7 @@ func (uss *UsageStats) GetUsageReport(ctx context.Context) (usagestats.Report, e
 	}
 
 	statsQuery := models.GetSystemStatsQuery{}
-	if err := uss.Bus.DispatchCtx(ctx, &statsQuery); err != nil {
+	if err := uss.Bus.Dispatch(ctx, &statsQuery); err != nil {
 		uss.log.Error("Failed to get system stats", "error", err)
 		return report, err
 	}
@@ -51,9 +51,9 @@ func (uss *UsageStats) GetUsageReport(ctx context.Context) (usagestats.Report, e
 	metrics["stats.viewers.count"] = statsQuery.Result.Viewers
 	metrics["stats.orgs.count"] = statsQuery.Result.Orgs
 	metrics["stats.playlist.count"] = statsQuery.Result.Playlists
-	metrics["stats.plugins.apps.count"] = uss.appCount()
-	metrics["stats.plugins.panels.count"] = uss.panelCount()
-	metrics["stats.plugins.datasources.count"] = uss.dataSourceCount()
+	metrics["stats.plugins.apps.count"] = uss.appCount(ctx)
+	metrics["stats.plugins.panels.count"] = uss.panelCount(ctx)
+	metrics["stats.plugins.datasources.count"] = uss.dataSourceCount(ctx)
 	metrics["stats.alerts.count"] = statsQuery.Result.Alerts
 	metrics["stats.active_users.count"] = statsQuery.Result.ActiveUsers
 	metrics["stats.active_admins.count"] = statsQuery.Result.ActiveAdmins
@@ -113,7 +113,7 @@ func (uss *UsageStats) GetUsageReport(ctx context.Context) (usagestats.Report, e
 	metrics["stats.avg_auth_token_per_user.count"] = avgAuthTokensPerUser
 
 	dsStats := models.GetDataSourceStatsQuery{}
-	if err := uss.Bus.DispatchCtx(ctx, &dsStats); err != nil {
+	if err := uss.Bus.Dispatch(ctx, &dsStats); err != nil {
 		uss.log.Error("Failed to get datasource stats", "error", err)
 		return report, err
 	}
@@ -123,7 +123,7 @@ func (uss *UsageStats) GetUsageReport(ctx context.Context) (usagestats.Report, e
 	// as sending that name could be sensitive information
 	dsOtherCount := 0
 	for _, dsStat := range dsStats.Result {
-		if uss.ShouldBeReported(dsStat.Type) {
+		if uss.ShouldBeReported(ctx, dsStat.Type) {
 			metrics["stats.ds."+dsStat.Type+".count"] = dsStat.Count
 		} else {
 			dsOtherCount += dsStat.Count
@@ -132,7 +132,7 @@ func (uss *UsageStats) GetUsageReport(ctx context.Context) (usagestats.Report, e
 	metrics["stats.ds.other.count"] = dsOtherCount
 
 	esDataSourcesQuery := models.GetDataSourcesByTypeQuery{Type: models.DS_ES}
-	if err := uss.Bus.Dispatch(&esDataSourcesQuery); err != nil {
+	if err := uss.Bus.Dispatch(ctx, &esDataSourcesQuery); err != nil {
 		uss.log.Error("Failed to get elasticsearch json data", "error", err)
 		return report, err
 	}
@@ -155,7 +155,7 @@ func (uss *UsageStats) GetUsageReport(ctx context.Context) (usagestats.Report, e
 
 	// fetch datasource access stats
 	dsAccessStats := models.GetDataSourceAccessStatsQuery{}
-	if err := uss.Bus.DispatchCtx(ctx, &dsAccessStats); err != nil {
+	if err := uss.Bus.Dispatch(ctx, &dsAccessStats); err != nil {
 		uss.log.Error("Failed to get datasource access stats", "error", err)
 		return report, err
 	}
@@ -171,7 +171,7 @@ func (uss *UsageStats) GetUsageReport(ctx context.Context) (usagestats.Report, e
 
 		access := strings.ToLower(dsAccessStat.Access)
 
-		if uss.ShouldBeReported(dsAccessStat.Type) {
+		if uss.ShouldBeReported(ctx, dsAccessStat.Type) {
 			metrics["stats.ds_access."+dsAccessStat.Type+"."+access+".count"] = dsAccessStat.Count
 		} else {
 			old := dsAccessOtherCount[access]
@@ -185,7 +185,7 @@ func (uss *UsageStats) GetUsageReport(ctx context.Context) (usagestats.Report, e
 
 	// get stats about alert notifier usage
 	anStats := models.GetAlertNotifierUsageStatsQuery{}
-	if err := uss.Bus.DispatchCtx(ctx, &anStats); err != nil {
+	if err := uss.Bus.Dispatch(ctx, &anStats); err != nil {
 		uss.log.Error("Failed to get alert notification stats", "error", err)
 		return report, err
 	}
@@ -296,7 +296,7 @@ func (uss *UsageStats) updateTotalStats(ctx context.Context) {
 	}
 
 	statsQuery := models.GetSystemStatsQuery{}
-	if err := uss.Bus.DispatchCtx(ctx, &statsQuery); err != nil {
+	if err := uss.Bus.Dispatch(ctx, &statsQuery); err != nil {
 		uss.log.Error("Failed to get system stats", "error", err)
 		return
 	}
@@ -320,7 +320,7 @@ func (uss *UsageStats) updateTotalStats(ctx context.Context) {
 	metrics.StatsTotalLibraryVariables.Set(float64(statsQuery.Result.LibraryVariables))
 
 	dsStats := models.GetDataSourceStatsQuery{}
-	if err := uss.Bus.DispatchCtx(ctx, &dsStats); err != nil {
+	if err := uss.Bus.Dispatch(ctx, &dsStats); err != nil {
 		uss.log.Error("Failed to get datasource stats", "error", err)
 		return
 	}
@@ -330,8 +330,8 @@ func (uss *UsageStats) updateTotalStats(ctx context.Context) {
 	}
 }
 
-func (uss *UsageStats) ShouldBeReported(dsType string) bool {
-	ds, exists := uss.pluginStore.Plugin(context.TODO(), dsType)
+func (uss *UsageStats) ShouldBeReported(ctx context.Context, dsType string) bool {
+	ds, exists := uss.pluginStore.Plugin(ctx, dsType)
 	if !exists {
 		return false
 	}
@@ -367,14 +367,14 @@ func (uss *UsageStats) GetUsageStatsId(ctx context.Context) string {
 	return anonId
 }
 
-func (uss *UsageStats) appCount() int {
-	return len(uss.pluginStore.Plugins(context.TODO(), plugins.App))
+func (uss *UsageStats) appCount(ctx context.Context) int {
+	return len(uss.pluginStore.Plugins(ctx, plugins.App))
 }
 
-func (uss *UsageStats) panelCount() int {
-	return len(uss.pluginStore.Plugins(context.TODO(), plugins.Panel))
+func (uss *UsageStats) panelCount(ctx context.Context) int {
+	return len(uss.pluginStore.Plugins(ctx, plugins.Panel))
 }
 
-func (uss *UsageStats) dataSourceCount() int {
-	return len(uss.pluginStore.Plugins(context.TODO(), plugins.DataSource))
+func (uss *UsageStats) dataSourceCount(ctx context.Context) int {
+	return len(uss.pluginStore.Plugins(ctx, plugins.DataSource))
 }

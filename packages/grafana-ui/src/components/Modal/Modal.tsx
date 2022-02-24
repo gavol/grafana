@@ -1,12 +1,12 @@
 import { cx } from '@emotion/css';
 import { FocusScope } from '@react-aria/focus';
+import { OverlayContainer } from '@react-aria/overlays';
 import React, { PropsWithChildren, useCallback, useEffect } from 'react';
 
 import { useTheme2 } from '../../themes';
 import { IconName } from '../../types';
 import { IconButton } from '../IconButton/IconButton';
 import { HorizontalGroup } from '../Layout/Layout';
-import { Portal } from '../Portal/Portal';
 import { getModalStyles } from './getModalStyles';
 import { ModalHeader } from './ModalHeader';
 
@@ -74,13 +74,17 @@ export function Modal(props: PropsWithChildren<Props>) {
   const headerClass = cx(styles.modalHeader, typeof title !== 'string' && styles.modalHeaderWithTabs);
 
   return (
-    <Portal>
+    <OverlayContainer>
       <div
         className={styles.modalBackdrop}
         onClick={onClickBackdrop || (closeOnBackdropClick ? onDismiss : undefined)}
       />
       <FocusScope contain={trapFocus} autoFocus restoreFocus>
-        <div className={cx(styles.modal, className)}>
+        {/*
+          tabIndex=-1 is needed here to support highlighting text within the modal when using FocusScope
+          see https://github.com/adobe/react-spectrum/issues/1604#issuecomment-781574668
+        */}
+        <div tabIndex={-1} className={cx(styles.modal, className)}>
           <div className={headerClass}>
             {typeof title === 'string' && <DefaultModalHeader {...props} title={title} />}
             {typeof title !== 'string' && title}
@@ -91,7 +95,7 @@ export function Modal(props: PropsWithChildren<Props>) {
           <div className={cx(styles.modalContent, contentClassName)}>{children}</div>
         </div>
       </FocusScope>
-    </Portal>
+    </OverlayContainer>
   );
 }
 

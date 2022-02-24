@@ -103,6 +103,11 @@ var (
 		Reason:     "Unique identifier needed to be able to get a dashboard",
 		StatusCode: 400,
 	}
+	ErrProvisionedDashboardNotFound = DashboardErr{
+		Reason:     "Dashboard is not provisioned",
+		StatusCode: 404,
+		Status:     "not-found",
+	}
 )
 
 // DashboardErr represents a dashboard error.
@@ -344,13 +349,13 @@ type SaveDashboardCommand struct {
 
 	UpdatedAt time.Time
 
-	Result *Dashboard
+	Result *Dashboard `json:"-"`
 }
 
 type TrimDashboardCommand struct {
 	Dashboard *simplejson.Json `json:"dashboard" binding:"Required"`
 	Meta      *simplejson.Json `json:"meta"`
-	Result    *Dashboard
+	Result    *Dashboard       `json:"-"`
 }
 
 type DashboardProvisioning struct {

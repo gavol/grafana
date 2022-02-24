@@ -36,6 +36,8 @@ import {
 import { getDashboardQueryRunner } from './DashboardQueryRunner/DashboardQueryRunner';
 import { mergePanelAndDashData } from './mergePanelAndDashData';
 import { PanelModel } from '../../dashboard/state';
+import { isStreamingDataFrame } from 'app/features/live/data/utils';
+import { StreamingDataFrame } from 'app/features/live/data/StreamingDataFrame';
 
 export interface QueryRunnerOptions<
   TQuery extends DataQuery = DataQuery,
@@ -52,20 +54,11 @@ export interface QueryRunnerOptions<
   minInterval: string | undefined | null;
   scopedVars?: ScopedVars;
   cacheTimeout?: string | null;
-  // *** START_OF_CHANGE ***
-  maxPBeast?: number;
-  intervalPBeast?: string | undefined;
-  fillGap?: string;
-  maxSelect?: boolean;
-  refString?: string;
-  errorBar?: boolean;
-  beforeInterval?: string;
-  afterInterval?: string;
-  // *** END_OF_CHANGE ***
   transformations?: DataTransformerConfig[];
 }
 
 let counter = 100;
+
 export function getNextRequestId() {
   return 'Q' + counter++;
 }
@@ -80,6 +73,7 @@ export class PanelQueryRunner {
   private subscription?: Unsubscribable;
   private lastResult?: PanelData;
   private dataConfigSource: DataConfigSource;
+  private lastRequest?: DataQueryRequest;
 
   constructor(dataConfigSource: DataConfigSource) {
     this.subject = new ReplaySubject(1);
@@ -93,11 +87,8 @@ export class PanelQueryRunner {
     const { withFieldConfig, withTransforms } = options;
     let structureRev = 1;
     let lastData: DataFrame[] = [];
-    let processedCount = 0;
+    let isFirstPacket = true;
     let lastConfigRev = -1;
-    const fastCompare = (a: DataFrame, b: DataFrame) => {
-      return compareDataFrameStructures(a, b, true);
-    };
 
     if (this.dataConfigSource.snapshotData) {
       const snapshotPanelData: PanelData = {
@@ -112,24 +103,21 @@ export class PanelQueryRunner {
       this.getTransformationsStream(withTransforms),
       map((data: PanelData) => {
         let processedData = data;
-        let sameStructure = false;
+        let streamingPacketWithSameSchema = false;
 
         if (withFieldConfig && data.series?.length) {
-          // Apply field defaults and overrides
-          let fieldConfig = this.dataConfigSource.getFieldOverrideOptions();
-          let processFields = fieldConfig != null;
+          if (lastConfigRev === this.dataConfigSource.configRev) {
+            const streamingDataFrame = data.series.find((data) => isStreamingDataFrame(data)) as
+              | StreamingDataFrame
+              | undefined;
 
-          // If the shape is the same, we can skip field overrides
-          if (
-            data.state === LoadingState.Streaming &&
-            processFields &&
-            processedCount > 0 &&
-            lastData.length &&
-            lastConfigRev === this.dataConfigSource.configRev
-          ) {
-            const sameTypes = compareArrayValues(lastData, processedData.series, fastCompare);
-            if (sameTypes) {
-              // Keep the previous field config settings
+            if (
+              streamingDataFrame &&
+              !streamingDataFrame.packetInfo.schemaChanged &&
+              // TODO: remove the condition below after fixing
+              // https://github.com/grafana/grafana/pull/41492#issuecomment-970281430
+              lastData[0].fields.length === streamingDataFrame.fields.length
+            ) {
               processedData = {
                 ...processedData,
                 series: lastData.map((frame, frameIndex) => ({
@@ -141,20 +129,21 @@ export class PanelQueryRunner {
                     state: {
                       ...field.state,
                       calcs: undefined,
-                      // add global range calculation here? (not optimal for streaming)
                       range: undefined,
                     },
                   })),
                 })),
               };
-              processFields = false;
-              sameStructure = true;
+
+              streamingPacketWithSameSchema = true;
             }
           }
 
-          if (processFields) {
+          // Apply field defaults and overrides
+          let fieldConfig = this.dataConfigSource.getFieldOverrideOptions();
+
+          if (fieldConfig != null && (isFirstPacket || !streamingPacketWithSameSchema)) {
             lastConfigRev = this.dataConfigSource.configRev!;
-            processedCount++; // results with data
             processedData = {
               ...processedData,
               series: applyFieldOverrides({
@@ -163,16 +152,16 @@ export class PanelQueryRunner {
                 ...fieldConfig!,
               }),
             };
+            isFirstPacket = false;
           }
         }
 
-        if (!sameStructure) {
-          sameStructure = compareArrayValues(lastData, processedData.series, compareDataFrameStructures);
-        }
-        if (!sameStructure) {
+        if (
+          !streamingPacketWithSameSchema &&
+          !compareArrayValues(lastData, processedData.series, compareDataFrameStructures)
+        ) {
           structureRev++;
         }
-
         lastData = processedData.series;
 
         return { ...processedData, structureRev };
@@ -209,16 +198,6 @@ export class PanelQueryRunner {
       timeRange,
       timeInfo,
       cacheTimeout,
-      // *** START_OF_CHANGE ***
-      fillGap,
-      maxSelect,
-      refString,
-      errorBar,
-      beforeInterval,
-      afterInterval,
-      maxPBeast,
-      intervalPBeast,
-      // *** END_OF_CHANGE ***
       maxDataPoints,
       scopedVars,
       minInterval,
@@ -243,16 +222,6 @@ export class PanelQueryRunner {
       maxDataPoints: maxDataPoints,
       scopedVars: scopedVars || {},
       cacheTimeout,
-      // *** START_OF_CHANGE ***
-      maxPBeast: maxPBeast,
-      intervalPBeast: intervalPBeast,
-      fillGap: fillGap,
-      maxSelect: maxSelect,
-      refString: refString,
-      errorBar: errorBar,
-      beforeInterval: beforeInterval,
-      afterInterval: afterInterval,
-      // *** END_OF_CHANGE ***
       startTime: Date.now(),
     };
 
@@ -283,6 +252,8 @@ export class PanelQueryRunner {
       request.interval = norm.interval;
       request.intervalMs = norm.intervalMs;
 
+      this.lastRequest = request;
+
       this.pipeToSubject(runRequest(ds, request), panelId);
     } catch (err) {
       console.error('PanelQueryRunner Error', err);
@@ -298,7 +269,7 @@ export class PanelQueryRunner {
     const dataSupport = this.dataConfigSource.getDataSupport();
 
     if (dataSupport.alertStates || dataSupport.annotations) {
-      const panel = (this.dataConfigSource as unknown) as PanelModel;
+      const panel = this.dataConfigSource as unknown as PanelModel;
       panelData = mergePanelAndDashData(observable, getDashboardQueryRunner().getResult(panel.id));
     }
 
@@ -364,6 +335,10 @@ export class PanelQueryRunner {
 
   getLastResult(): PanelData | undefined {
     return this.lastResult;
+  }
+
+  getLastRequest(): DataQueryRequest | undefined {
+    return this.lastRequest;
   }
 }
 

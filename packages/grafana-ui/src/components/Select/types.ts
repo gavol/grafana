@@ -1,6 +1,6 @@
 import { SelectableValue } from '@grafana/data';
 import React from 'react';
-import { ActionMeta as SelectActionMeta } from 'react-select';
+import { ActionMeta as SelectActionMeta, GroupBase, OptionsOrGroups } from 'react-select';
 
 export type SelectValue<T> = T | SelectableValue<T> | T[] | Array<SelectableValue<T>>;
 export type ActionMeta = SelectActionMeta<{}>;
@@ -46,9 +46,8 @@ export interface SelectCommonProps<T> {
   menuPlacement?: 'auto' | 'bottom' | 'top';
   menuPosition?: 'fixed' | 'absolute';
   /**
-   * @deprecated
    * Setting to true will portal the menu to `document.body`.
-   * This property will soon be removed and portalling will be the default behavior.
+   * This property will soon default to true and portalling will be the default behavior.
    */
   menuShouldPortal?: boolean;
   /** The message to display when no options could be found */
@@ -77,8 +76,10 @@ export interface SelectCommonProps<T> {
   isValidNewOption?: (
     inputValue: string,
     value: SelectableValue<T> | null,
-    options: Readonly<Array<SelectableValue<T>>>
+    options: OptionsOrGroups<unknown, GroupBase<unknown>>
   ) => boolean;
+  /** Message to display isLoading=true*/
+  loadingMessage?: string;
 }
 
 export interface SelectAsyncProps<T> {

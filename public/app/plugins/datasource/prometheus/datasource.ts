@@ -9,8 +9,11 @@ import {
   DataQueryRequest,
   DataQueryResponse,
   DataSourceInstanceSettings,
+  DataSourceWithQueryExportSupport,
+  DataSourceWithQueryImportSupport,
   dateMath,
   DateTime,
+  AbstractQuery,
   LoadingState,
   rangeUtil,
   ScopedVars,
@@ -35,7 +38,7 @@ import addLabelToQuery from './add_label_to_query';
 import PrometheusLanguageProvider from './language_provider';
 import { expandRecordingRules } from './language_utils';
 import { getInitHints, getQueryHints } from './query_hints';
-import { getOriginalMetricName, renderTemplate, transform, transformV2 } from './result_transformer';
+import { getOriginalMetricName, transform, transformV2 } from './result_transformer';
 import {
   ExemplarTraceIdDestination,
   PromDataErrorResponse,
@@ -51,11 +54,15 @@ import {
 } from './types';
 import { PrometheusVariableSupport } from './variables';
 import PrometheusMetricFindQuery from './metric_find_query';
+import { renderLegendFormat } from './legend';
 
 export const ANNOTATION_QUERY_STEP_DEFAULT = '60s';
 const GET_AND_POST_METADATA_ENDPOINTS = ['api/v1/query', 'api/v1/query_range', 'api/v1/series', 'api/v1/labels'];
 
-export class PrometheusDatasource extends DataSourceWithBackend<PromQuery, PromOptions> {
+export class PrometheusDatasource
+  extends DataSourceWithBackend<PromQuery, PromOptions>
+  implements DataSourceWithQueryImportSupport<PromQuery>, DataSourceWithQueryExportSupport<PromQuery>
+{
   type: string;
   editorSrc: string;
   ruleMappings: { [index: string]: string };
@@ -78,7 +85,8 @@ export class PrometheusDatasource extends DataSourceWithBackend<PromQuery, PromO
   constructor(
     instanceSettings: DataSourceInstanceSettings<PromOptions>,
     private readonly templateSrv: TemplateSrv = getTemplateSrv(),
-    private readonly timeSrv: TimeSrv = getTimeSrv()
+    private readonly timeSrv: TimeSrv = getTimeSrv(),
+    languageProvider?: PrometheusLanguageProvider
   ) {
     super(instanceSettings);
 
@@ -97,7 +105,7 @@ export class PrometheusDatasource extends DataSourceWithBackend<PromQuery, PromO
     this.directUrl = instanceSettings.jsonData.directUrl ?? this.url;
     this.exemplarTraceIdDestinations = instanceSettings.jsonData.exemplarTraceIdDestinations;
     this.ruleMappings = {};
-    this.languageProvider = new PrometheusLanguageProvider(this);
+    this.languageProvider = languageProvider ?? new PrometheusLanguageProvider(this);
     this.lookupsDisabled = instanceSettings.jsonData.disableMetricsLookup ?? false;
     this.customQueryParameters = new URLSearchParams(instanceSettings.jsonData.customQueryParameters);
     this.variables = new PrometheusVariableSupport(this, this.templateSrv, this.timeSrv);
@@ -170,14 +178,20 @@ export class PrometheusDatasource extends DataSourceWithBackend<PromQuery, PromO
     return getBackendSrv().fetch<T>(options);
   }
 
+  async importFromAbstractQueries(abstractQueries: AbstractQuery[]): Promise<PromQuery[]> {
+    return abstractQueries.map((abstractQuery) => this.languageProvider.importFromAbstractQuery(abstractQuery));
+  }
+
+  async exportToAbstractQueries(queries: PromQuery[]): Promise<AbstractQuery[]> {
+    return queries.map((query) => this.languageProvider.exportToAbstractQuery(query));
+  }
+
   // Use this for tab completion features, wont publish response to other components
   async metadataRequest<T = any>(url: string, params = {}) {
     // If URL includes endpoint that supports POST and GET method, try to use configured method. This might fail as POST is supported only in v2.10+.
     if (GET_AND_POST_METADATA_ENDPOINTS.some((endpoint) => url.includes(endpoint))) {
       try {
-        return await lastValueFrom(
-          this._request<T>(url, params, { method: this.httpMethod, hideFromInspector: true })
-        );
+        return await lastValueFrom(this._request<T>(url, params, { method: this.httpMethod, hideFromInspector: true }));
       } catch (err) {
         // If status code of error is Method Not Allowed (405) and HTTP method is POST, retry with GET
         if (this.httpMethod === 'POST' && err.status === 405) {
@@ -188,9 +202,7 @@ export class PrometheusDatasource extends DataSourceWithBackend<PromQuery, PromO
       }
     }
 
-    return await lastValueFrom(
-      this._request<T>(url, params, { method: 'GET', hideFromInspector: true })
-    ); // toPromise until we change getTagValues, getTagKeys to Observable
+    return await lastValueFrom(this._request<T>(url, params, { method: 'GET', hideFromInspector: true })); // toPromise until we change getTagValues, getTagKeys to Observable
   }
 
   interpolateQueryExpr(value: string | string[] = [], variable: any) {
@@ -754,9 +766,9 @@ export class PrometheusDatasource extends DataSourceWithBackend<PromQuery, PromO
           time: timestamp,
           timeEnd: timestamp,
           annotation,
-          title: renderTemplate(titleFormat, labels),
+          title: renderLegendFormat(titleFormat, labels),
           tags,
-          text: renderTemplate(textFormat, labels),
+          text: renderLegendFormat(textFormat, labels),
         };
       }
 
@@ -779,9 +791,19 @@ export class PrometheusDatasource extends DataSourceWithBackend<PromQuery, PromO
     );
   }
 
-  async getTagKeys() {
-    const result = await this.metadataRequest('/api/v1/labels');
-    return result?.data?.data?.map((value: any) => ({ text: value })) ?? [];
+  async getTagKeys(options?: any) {
+    if (options?.series) {
+      // Get tags for the provided series only
+      const seriesLabels: Array<Record<string, string[]>> = await Promise.all(
+        options.series.map((series: string) => this.languageProvider.fetchSeriesLabels(series))
+      );
+      const uniqueLabels = [...new Set(...seriesLabels.map((value) => Object.keys(value)))];
+      return uniqueLabels.map((value: any) => ({ text: value }));
+    } else {
+      // Get all tags
+      const result = await this.metadataRequest('/api/v1/labels');
+      return result?.data?.data?.map((value: any) => ({ text: value })) ?? [];
+    }
   }
 
   async getTagValues(options: { key?: string } = {}) {
