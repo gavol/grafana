@@ -12,7 +12,7 @@ import { CoreApp } from './app';
 import { CustomVariableSupport, DataSourceVariableSupport, StandardVariableSupport } from './variables';
 import { makeClassES5Compatible } from '../utils/makeClassES5Compatible';
 import { DataQuery } from './query';
-import { DataSourceRef } from '.';
+import { DataSourceRef, WithAccessControlMetadata } from '.';
 
 export interface DataSourcePluginOptionsEditorProps<JSONData = DataSourceJsonData, SecureJSONData = {}> {
   options: DataSourceSettings<JSONData, SecureJSONData>;
@@ -220,7 +220,7 @@ abstract class DataSourceApi<
   }
 
   /**
-   * Imports queries from a different datasource
+   * @deprecated use DataSourceWithQueryImportSupport and DataSourceWithQueryExportSupport
    */
   async importQueries?(queries: DataQuery[], originDataSource: DataSourceApi<DataQuery>): Promise<TQuery[]>;
 
@@ -560,7 +560,8 @@ export interface DataSourceJsonData {
  * Data Source instance edit model.  This is returned from:
  *  /api/datasources
  */
-export interface DataSourceSettings<T extends DataSourceJsonData = DataSourceJsonData, S = {}> {
+export interface DataSourceSettings<T extends DataSourceJsonData = DataSourceJsonData, S = {}>
+  extends WithAccessControlMetadata {
   id: number;
   uid: string;
   orgId: number;

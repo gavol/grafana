@@ -121,8 +121,6 @@ In [Query options]({{< relref "../panels/reference-query-options.md" >}}), you c
 
 > **Note:** Panel time overrides have no effect when the time range for the dashboard is absolute.
 
-> **Note:** Panel time overrides have no effect when the time range for the dashboard is absolute.
-
 ## Control the time range using a URL
 
 Time range of a dashboard can be controlled by providing following query parameters in the dashboard URL:
