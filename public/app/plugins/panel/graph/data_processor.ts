@@ -46,7 +46,10 @@ export class DataProcessor {
           datapoints.push([field.values.get(r), dateTime(timeField.values.get(r)).valueOf()]);
         }
 
-        list.push(this.toTimeSeries(field, name, i, j, datapoints, list.length, range));
+        // *** START_OF_CHANGE ***
+        const opt = (series.hasOwnProperty('meta') === false || series.meta === undefined) ? undefined : series.meta.v1;
+        list.push(this.toTimeSeries(field, name, i, j, datapoints, list.length, range, opt));
+        // *** END_OF_CHANGE ***
       }
     }
 
@@ -65,6 +68,7 @@ export class DataProcessor {
     return list;
   }
 
+  // *** START_OF_CHANGE ***
   private toTimeSeries(
     field: Field,
     alias: string,
@@ -72,8 +76,10 @@ export class DataProcessor {
     fieldIndex: number,
     datapoints: any[][],
     index: number,
-    range?: TimeRange
+    range?: TimeRange,
+    opt?: any
   ) {
+    // *** END_OF_CHANGE ***
     const colorIndex = index % colors.length;
     const color = this.panel.aliasColors[alias] || colors[colorIndex];
 
@@ -84,6 +90,9 @@ export class DataProcessor {
       unit: field.config ? field.config.unit : undefined,
       dataFrameIndex,
       fieldIndex,
+      // *** START_OF_CHANGE ***
+      extraOptions: opt,
+      // *** START_OF_CHANGE ***
     });
 
     if (datapoints && datapoints.length > 0 && range) {

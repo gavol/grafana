@@ -2,7 +2,10 @@ import { css } from '@emotion/css';
 import React, { PureComponent, ChangeEvent, FocusEvent } from 'react';
 
 import { rangeUtil, PanelData, DataSourceApi } from '@grafana/data';
-import { Switch, Input, InlineField, InlineFormLabel, stylesFactory } from '@grafana/ui';
+// *** START_OF_CHANGE ***
+// Added the import of Checkbox
+import { Checkbox, Switch, Input, InlineField, InlineFormLabel, stylesFactory } from '@grafana/ui';
+// *** END_OF_CHANGE ***
 import { QueryOperationRow } from 'app/core/components/QueryOperationRow/QueryOperationRow';
 import { config } from 'app/core/config';
 import { QueryGroupOptions } from 'app/types';
@@ -139,6 +142,228 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
     }
   };
 
+  // *** START_OF_CHANGE ***
+  onToggleBarChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { onChange, options } = this.props;
+    let errorBar = event.target.value === 'true' ? true : false;
+    onChange({
+      ...options,
+      errorBar,
+    });
+  };
+
+  onMaxSelectChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { onChange, options } = this.props;
+    let maxSelect = true; //event.target.checked;
+    onChange({
+      ...options,
+      maxSelect,
+    });
+  };
+
+  onIntervalSelectChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { onChange, options } = this.props;
+    let maxSelect = false; //event.target.checked;
+    onChange({
+      ...options,
+      maxSelect,
+    });
+  };
+
+  onMaxPBeastBlur = (event: any) => {
+    const { options, onChange } = this.props;
+
+    let maxPBeast: number | null = parseInt(event.target.value as string, 10);
+
+    if (isNaN(maxPBeast) || maxPBeast === null) {
+      maxPBeast = 100;
+    }
+
+    if (maxPBeast !== options.maxPBeast) {
+      onChange({
+        ...options,
+        maxPBeast,
+      });
+    }
+  };
+
+  onIntervalPBeastBlur = (event: ChangeEvent<HTMLInputElement>) => {
+    const { options, onChange } = this.props;
+    const intervalPBeast = emptyToNull(event.target.value);
+    if (intervalPBeast !== options.intervalPBeast) {
+      onChange({
+        ...options,
+        intervalPBeast,
+      });
+    }
+  };
+
+  onRefStringBlur = (event: ChangeEvent<HTMLInputElement>) => {
+    const { options, onChange } = this.props;
+    let refString = event.target.value;
+    onChange({
+      ...options,
+      refString,
+    });
+  };
+
+  onBeforeBlur = (event: ChangeEvent<HTMLInputElement>) => {
+    const { options, onChange } = this.props;
+    let beforeInterval = event.target.value;
+    onChange({
+      ...options,
+      beforeInterval,
+    });
+  };
+
+  onAfterBlur = (event: ChangeEvent<HTMLInputElement>) => {
+    const { options, onChange } = this.props;
+    let afterInterval = event.target.value;
+    onChange({
+      ...options,
+      afterInterval,
+    });
+  };
+
+  onFillGapBlur = (event: ChangeEvent<HTMLSelectElement>) => {
+    const { options, onChange } = this.props;
+    let fillGap = emptyToNull(event.target.value);
+    onChange({
+      ...options,
+      fillGap,
+    });
+  };
+
+  renderFillGapOption() {
+    const { dataSource, options } = this.props; //, options } = this.props;
+
+    const tooltip = "The default (and recommented) value is \"Near\"."  +
+    "With \"All\", the returned time series will all have the same number of data-points and identical time-stamps " +
+    "(use this for correlation plots, with the MetaQueries plugin or the transform actions). With \"None\", no extra processing is done on data.";
+    
+    let fillGap = options.fillGap ?? 'near';
+
+    if (!dataSource.meta.queryOptions?.fillGap) {
+      return null;
+    }
+
+    return (
+      <div className="gf-form-inline">
+        <div className="gf-form">
+          <InlineFormLabel width={9} tooltip={tooltip}>
+            Fill Gaps
+          </InlineFormLabel>
+          <select value={fillGap} className="width-6" onChange={this.onFillGapBlur}>
+            <option value="near">Near</option>
+            <option value="all">All</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+      </div>
+    );
+  }
+
+  renderErrorBarOption() {
+    const { dataSource, options } = this.props;
+
+    let errorBar = options.errorBar === true ? 'true' : 'false';
+
+    if (!dataSource.meta.queryOptions?.errorBar) {
+      return null;
+    }
+
+    return (
+      <div className="gf-form">
+        <InlineFormLabel width={9} tooltip={<>Enable/disable the error bands</>}>
+          Error Bar
+        </InlineFormLabel>
+        <select value={errorBar} className="width-6" onChange={this.onToggleBarChange}>
+          <option value="true">Show</option>
+          <option value="false">Hide</option>
+        </select>
+      </div>
+    );
+  }
+
+  renderRefStringOption() {
+    const { dataSource, options } = this.props;
+
+    let refString = options.refString ?? '';
+
+    if (!dataSource.meta.queryOptions?.refString) {
+      return null;
+    }
+
+    return (
+      <div className="gf-form">
+        <InlineFormLabel width={9} tooltip={<>The default value is empty</>}>
+          Reference String
+        </InlineFormLabel>
+        <Input
+          type="text"
+          className="width-6"
+          placeholder=""
+          spellCheck={false}
+          onBlur={this.onRefStringBlur}
+          defaultValue={refString}
+        />
+      </div>
+    );
+  }
+
+  renderBeforeIntervalOption() {
+    const { dataSource, options } = this.props;
+
+    let beforeInterval = options.beforeInterval ?? '60';
+
+    if (!dataSource.meta.queryOptions?.beforeInterval) {
+      return null;
+    }
+
+    return (
+      <div className="gf-form">
+        <InlineFormLabel width={12} tooltip={<>Extend the query time interval (value to be defined in seconds)</>}>
+          Lookup before time interval
+        </InlineFormLabel>
+        <Input
+          type="text"
+          className="width-6"
+          placeholder="60"
+          spellCheck={false}
+          onBlur={this.onBeforeBlur}
+          defaultValue={beforeInterval}
+        />
+      </div>
+    );
+  }
+
+  renderAfterIntervalOption() {
+    const { dataSource, options } = this.props;
+
+    let afterInterval = options.afterInterval ?? '60';
+
+    if (!dataSource.meta.queryOptions?.afterInterval) {
+      return null;
+    }
+
+    return (
+      <div className="gf-form">
+        <InlineFormLabel width={12} tooltip={<>Extend the query time interval (value to be defined in seconds)</>}>
+          Lookup after time interval
+        </InlineFormLabel>
+        <Input
+          type="text"
+          className="width-6"
+          placeholder="60"
+          spellCheck={false}
+          onBlur={this.onAfterBlur}
+          defaultValue={afterInterval}
+        />
+      </div>
+    );
+  }
+  // *** END_OF_CHANGE ***
+
   renderCacheTimeoutOption() {
     const { dataSource, options } = this.props;
 
@@ -169,10 +394,19 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
   }
 
   renderMaxDataPointsOption() {
-    const { data, options } = this.props;
+    // *** START_OF_CHANGE ***
+    // Added the import of dataSource
+    const { data, dataSource, options } = this.props;
+    // *** END_OF_CHANGE ***
     const realMd = data.request?.maxDataPoints;
     const value = options.maxDataPoints ?? '';
     const isAuto = value === '';
+
+    // *** START_OF_CHANGE ***
+    if (!dataSource.meta.queryOptions?.maxDataPoints) {
+      return null;
+    }
+    // *** END_OF_CHANGE ***
 
     return (
       <div className="gf-form-inline">
@@ -211,6 +445,12 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
     const { data, dataSource, options } = this.props;
     const realInterval = data.request?.interval;
     const minIntervalOnDs = dataSource.interval ?? 'No limit';
+
+    // *** START_OF_CHANGE ***
+    if (!dataSource.meta.queryOptions?.minInterval) {
+      return null;
+    }
+    // *** END_OF_CHANGE ***
 
     return (
       <>
@@ -260,6 +500,96 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
     );
   }
 
+  // *** START_OF_CHANGE ***
+  renderMaxPBeastOption() {
+    const { data, dataSource, options } = this.props;
+    if (!dataSource.meta.queryOptions?.maxPBeast) {
+      return null;
+    }
+    const realMd = data.request?.maxPBeast;
+    let value = options.maxPBeast ?? '';
+    if (value === '' || value === undefined) {
+      options.maxPBeast = 100;
+    }
+
+    const isAuto1 = value === 0;
+    let test = options.maxSelect ?? true;
+
+    return (
+      <div className="gf-form-inline">
+        <div className="gf-form">
+          <Checkbox label="PBeast__points" checked={test} onChange={this.onMaxSelectChange} />
+          <InlineFormLabel
+            width={2}
+            tooltip={
+              <>
+                The maximum number of data points per series. Default value is 100. A value of 0 would set the
+                maximum number of data points per series equal to the pixel width of the graph on the screen.
+              </>
+            }
+          >
+            {` `}
+          </InlineFormLabel>
+          <Input
+            type="number"
+            className="width-6"
+            placeholder={`${realMd}`}
+            spellCheck={false}
+            onBlur={this.onMaxPBeastBlur}
+            defaultValue={value}
+          />
+          {isAuto1 && (
+            <>
+              <div className="gf-form-label query-segment-operator">=</div>
+              <div className="gf-form-label">Width of panel</div>
+            </>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  renderIntervalPBeastOption() {
+    const { data, dataSource, options } = this.props;
+    if (!dataSource.meta.queryOptions?.intervalPBeast) {
+      return null;
+    }
+    const realInterval = data.request?.intervalPBeast;
+
+    //const minIntervalOnDs = dataSource.interval ?? 'No limit';
+    let test = !(options.maxSelect ?? true);
+
+    return (
+      <>
+        <div className="gf-form-inline">
+          <div className="gf-form">
+            <Checkbox label="PBeast interval" checked={test} onChange={this.onIntervalSelectChange} />
+            <InlineFormLabel
+              width={2}
+              tooltip={
+                <>
+                  Set the minimum time interval between data points in a series. Valid formats are, for instance,
+                  10s, 10m, 1h.
+                </>
+              }
+            >
+              {' '}
+            </InlineFormLabel>
+            <Input
+              type="text"
+              className="width-6"
+              placeholder=""
+              spellCheck={false}
+              onBlur={this.onIntervalPBeastBlur}
+              defaultValue={realInterval ?? ''}
+            />
+          </div>
+        </div>
+      </>
+    );
+  }
+  // *** END_OF_CHANGE ***
+
   onOpenOptions = () => {
     this.setState({ isOpen: true });
   };
@@ -286,12 +616,33 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
       intervalDesc = `${data.request.interval}`;
     }
 
-    return (
-      <>
-        {<div className={styles.collapsedText}>MD = {mdDesc}</div>}
-        {<div className={styles.collapsedText}>Interval = {intervalDesc}</div>}
-      </>
-    );
+    // *** START_OF_CHANGE ***
+    if (options.maxPBeast || options.maxPBeast === 0) {
+      mdDesc = options.maxPBeast ?? 100;
+      if (mdDesc === 0 && data.request) {
+        mdDesc = `auto = ${data.request.maxPBeast}`;
+      }
+
+      intervalDesc = options.intervalPBeast;
+      if (data.request) {
+        intervalDesc = `${data.request.intervalPBeast}`;
+      }
+
+      return (
+        <>
+          {<div className={styles.collapsedText}> PBeast MD = {mdDesc}</div>}
+          {<div className={styles.collapsedText}>Interval = {intervalDesc}</div>}
+        </>
+      );
+    } else {
+      return (
+        <>
+          {<div className={styles.collapsedText}> MD = {mdDesc}</div>}
+          {<div className={styles.collapsedText}>Interval = {intervalDesc}</div>}
+        </>
+      );
+    }
+    // *** END_OF_CHANGE ***
   }
 
   render() {
@@ -312,6 +663,15 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
         {this.renderMaxDataPointsOption()}
         {this.renderIntervalOption()}
         {this.renderCacheTimeoutOption()}
+        {/* START_OF_CHANGE */}
+        {this.renderMaxPBeastOption()}
+        {this.renderIntervalPBeastOption()}
+        {this.renderRefStringOption()}
+        {this.renderErrorBarOption()}
+        {this.renderFillGapOption()}
+        {this.renderBeforeIntervalOption()}
+        {this.renderAfterIntervalOption()}
+        {/* END_OF_CHANGE */}
 
         <div className="gf-form">
           <InlineFormLabel width={9}>Relative time</InlineFormLabel>

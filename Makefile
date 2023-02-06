@@ -15,7 +15,7 @@ SH_FILES ?= $(shell find ./scripts -name *.sh)
 GO_BUILD_FLAGS += $(if $(GO_BUILD_DEV),-dev)
 GO_BUILD_FLAGS += $(if $(GO_BUILD_TAGS),-build-tags=$(GO_BUILD_TAGS))
 
-all: deps build
+all: gen-go deps build
 
 ##@ Dependencies
 
@@ -24,7 +24,7 @@ deps-go: ## Install backend dependencies.
 
 deps-js: node_modules ## Install frontend dependencies.
 
-deps: deps-js ## Install all dependencies.
+deps: deps-go deps-js ## Install all dependencies.
 
 node_modules: package.json yarn.lock ## Install node modules.
 	@echo "install frontend dependencies"

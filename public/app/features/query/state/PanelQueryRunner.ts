@@ -57,6 +57,16 @@ export interface QueryRunnerOptions<
   minInterval: string | undefined | null;
   scopedVars?: ScopedVars;
   cacheTimeout?: string | null;
+  // *** START_OF_CHANGE ***
+  maxPBeast?: number;
+  intervalPBeast?: string | undefined;
+  fillGap?: string;
+  maxSelect?: boolean;
+  refString?: string;
+  errorBar?: boolean;
+  beforeInterval?: string;
+  afterInterval?: string;
+  // *** END_OF_CHANGE ***
   transformations?: DataTransformerConfig[];
 }
 
@@ -211,6 +221,16 @@ export class PanelQueryRunner {
       timeInfo,
       cacheTimeout,
       maxDataPoints,
+      // *** START_OF_CHANGE ***
+      fillGap,
+      maxSelect,
+      refString,
+      errorBar,
+      beforeInterval,
+      afterInterval,
+      maxPBeast,
+      intervalPBeast,
+      // *** END_OF_CHANGE ***
       scopedVars,
       minInterval,
     } = options;
@@ -236,6 +256,16 @@ export class PanelQueryRunner {
       maxDataPoints: maxDataPoints,
       scopedVars: scopedVars || {},
       cacheTimeout,
+      // *** START_OF_CHANGE ***
+      maxPBeast: maxPBeast,
+      intervalPBeast: intervalPBeast,
+      fillGap: fillGap,
+      maxSelect: maxSelect,
+      refString: refString,
+      errorBar: errorBar,
+      beforeInterval: beforeInterval,
+      afterInterval: afterInterval,
+      // *** END_OF_CHANGE ***
       startTime: Date.now(),
     };
 
