@@ -104,6 +104,16 @@ const mustKeepProps: { [str: string]: boolean } = {
   hasRefreshed: true,
   events: true,
   cacheTimeout: true,
+  // *** START_OF_CHANGE ***
+  fillGap: true,
+  maxSelect: true,
+  refString: true,
+  errorBar: true,
+  beforeInterval: true,
+  afterInterval: true,
+  maxPBeast: true,
+  intervalPBeast: true,
+  // *** END_OF_CHANGE ***  
   cachedPluginOptions: true,
   transparent: true,
   pluginVersion: true,
@@ -184,6 +194,16 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   hasSavedPanelEditChange?: boolean;
   hasRefreshed?: boolean;
   cacheTimeout?: string | null;
+  // *** START_OF_CHANGE ***
+  maxPBeast?: number | null;
+  intervalPBeast?: string | null;
+  fillGap?: any;
+  maxSelect?: boolean;
+  refString?: string | null;
+  errorBar?: boolean;
+  beforeInterval?: string | null;
+  afterInterval?: string | null;
+  // *** END_OF_CHANGE ***
   cachedPluginOptions: Record<string, PanelOptionsCache> = {};
   legend?: { show: boolean; sort?: string; sortDesc?: boolean };
   plugin?: PanelPlugin;
@@ -368,6 +388,16 @@ export class PanelModel implements DataConfigSource, IPanelModel {
       cacheTimeout: this.cacheTimeout,
       transformations: this.transformations,
       app: this.isEditing ? CoreApp.PanelEditor : this.isViewing ? CoreApp.PanelViewer : CoreApp.Dashboard,
+      // *** START_OF_CHANGE ***
+      maxPBeast: this.maxPBeast === 0 ? width : this.maxPBeast || 100,
+      intervalPBeast: this.intervalPBeast || '',
+      fillGap: this.fillGap,
+      maxSelect: this.maxSelect,
+      refString: this.refString || '',
+      errorBar: this.errorBar || false,
+      beforeInterval: this.beforeInterval || '60',
+      afterInterval: this.afterInterval || '60',
+      // *** END_OF_CHANGE ***
     });
   }
 
