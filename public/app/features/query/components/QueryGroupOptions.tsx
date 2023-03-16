@@ -163,14 +163,14 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
 
   onIntervalSelectChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { onChange, options } = this.props;
-    let intervalPBeast = false; //event.target.checked;
+    let maxSelect = false; //event.target.checked;
     onChange({
       ...options,
-      intervalPBeast,
+      maxSelect,
     });
   };
 
-  onMaxPBeastBlur = (event: ChangeEvent<HTMLInputElement>) => {
+  onMaxPBeastBlur = (event: any) => {
     const { options, onChange } = this.props;
 
     let maxPBeast: number | null = parseInt(event.target.value as string, 10);
