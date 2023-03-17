@@ -561,6 +561,17 @@ export class PanelModel implements DataConfigSource, IPanelModel {
       this.savedQueryLink = null;
     }
 
+    // *** START_OF_CHANGE ***
+    this.intervalPBeast = options.intervalPBeast;
+    this.maxPBeast = options.maxPBeast;
+    this.fillGap = options.fillGap;
+    this.maxSelect = options.maxSelect;
+    this.refString = options.refString;
+    this.errorBar = options.errorBar;
+    this.beforeInterval = options.beforeInterval;
+    this.afterInterval = options.afterInterval;
+    // *** END_OF_CHANGE ***
+
     this.cacheTimeout = options.cacheTimeout;
     this.timeFrom = options.timeRange?.from;
     this.timeShift = options.timeRange?.shift;
