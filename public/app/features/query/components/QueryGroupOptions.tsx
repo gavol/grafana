@@ -322,7 +322,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
 
     return (
       <div className="gf-form">
-        <InlineFormLabel width={12} tooltip={<>Extend the query time interval (value to be defined in seconds)</>}>
+        <InlineFormLabel width={15} tooltip={<>Extend the query time interval (value to be defined in seconds)</>}>
           Lookup before time interval
         </InlineFormLabel>
         <Input
@@ -348,7 +348,7 @@ export class QueryGroupOptionsEditor extends PureComponent<Props, State> {
 
     return (
       <div className="gf-form">
-        <InlineFormLabel width={12} tooltip={<>Extend the query time interval (value to be defined in seconds)</>}>
+        <InlineFormLabel width={15} tooltip={<>Extend the query time interval (value to be defined in seconds)</>}>
           Lookup after time interval
         </InlineFormLabel>
         <Input
