@@ -98,6 +98,16 @@ const mustKeepProps: { [str: string]: boolean } = {
   hasRefreshed: true,
   events: true,
   cacheTimeout: true,
+  // *** START_OF_CHANGE ***
+  fillGap: true,
+  maxSelect: true,
+  refString: true,
+  errorBar: true,
+  beforeInterval: true,
+  afterInterval: true,
+  maxPBeast: true,
+  intervalPBeast: true,
+  // *** END_OF_CHANGE ***  
   queryCachingTTL: true,
   cachedPluginOptions: true,
   transparent: true,
@@ -189,6 +199,16 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   hasSavedPanelEditChange?: boolean;
   hasRefreshed?: boolean;
   cacheTimeout?: string | null;
+  // *** START_OF_CHANGE ***
+  maxPBeast?: number | null;
+  intervalPBeast?: string | null;
+  fillGap?: any;
+  maxSelect?: boolean;
+  refString?: string | null;
+  errorBar?: boolean;
+  beforeInterval?: string | null;
+  afterInterval?: string | null;
+  // *** END_OF_CHANGE ***
   queryCachingTTL?: number | null;
   isNew?: boolean;
 

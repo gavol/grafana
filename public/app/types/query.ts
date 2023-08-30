@@ -7,6 +7,16 @@ export interface QueryGroupOptions {
   minInterval?: string | null;
   cacheTimeout?: string | null;
   queryCachingTTL?: number | null;
+  // *** START_OF_CHANGE ***
+  intervalPBeast?: string | null;
+  maxPBeast?: number | null;
+  fillGap?: string | null;
+  maxSelect?: boolean;
+  refString?: string | null;
+  errorBar?: boolean;
+  beforeInterval?: string | null;
+  afterInterval?: string | null;
+  // *** END_OF_CHANGE ***
   timeRange?: {
     from?: string | null;
     shift?: string | null;
