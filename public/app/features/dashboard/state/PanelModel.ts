@@ -399,6 +399,16 @@ export class PanelModel implements DataConfigSource, IPanelModel {
       minInterval: this.interval,
       scopedVars: this.scopedVars,
       cacheTimeout: this.cacheTimeout,
+      // *** START_OF_CHANGE ***
+      maxPBeast: this.maxPBeast === 0 ? width : this.maxPBeast || 100,
+      intervalPBeast: this.intervalPBeast || '',
+      fillGap: this.fillGap,
+      maxSelect: this.maxSelect,
+      refString: this.refString || '',
+      errorBar: this.errorBar || false,
+      beforeInterval: this.beforeInterval || '60',
+      afterInterval: this.afterInterval || '60', 
+      // *** END_OF_CHANGE ***
       queryCachingTTL: this.queryCachingTTL,
       transformations: this.transformations,
       app: this.isEditing ? CoreApp.PanelEditor : this.isViewing ? CoreApp.PanelViewer : CoreApp.Dashboard,
@@ -557,7 +567,17 @@ export class PanelModel implements DataConfigSource, IPanelModel {
       uid: dataSource.uid,
       type: dataSource.type,
     };
-
+    
+    // *** START_OF_CHANGE ***
+    this.intervalPBeast = options.intervalPBeast;
+    this.maxPBeast = options.maxPBeast;
+    this.fillGap = options.fillGap;
+    this.maxSelect = options.maxSelect;
+    this.refString = options.refString;
+    this.errorBar = options.errorBar;
+    this.beforeInterval = options.beforeInterval;
+    this.afterInterval = options.afterInterval; 
+    // *** END_OF_CHANGE ***
     this.cacheTimeout = options.cacheTimeout;
     this.queryCachingTTL = options.queryCachingTTL;
     this.timeFrom = options.timeRange?.from;
