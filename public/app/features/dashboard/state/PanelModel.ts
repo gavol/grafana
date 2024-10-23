@@ -102,6 +102,16 @@ const mustKeepProps: { [str: string]: boolean } = {
   hasRefreshed: true,
   events: true,
   cacheTimeout: true,
+  // *** START_OF_CHANGE ***
+  fillGap: true,
+  maxSelect: true,
+  refString: true,
+  errorBar: true,
+  beforeInterval: true,
+  afterInterval: true,
+  maxPBeast: true,
+  intervalPBeast: true,
+  // *** END_OF_CHANGE ***  
   queryCachingTTL: true,
   cachedPluginOptions: true,
   transparent: true,
@@ -204,6 +214,16 @@ export class PanelModel implements DataConfigSource, IPanelModel {
   hasSavedPanelEditChange?: boolean;
   hasRefreshed?: boolean;
   cacheTimeout?: string | null;
+  // *** START_OF_CHANGE ***
+  maxPBeast?: number | null;
+  intervalPBeast?: string | null;
+  fillGap?: any;
+  maxSelect?: boolean;
+  refString?: string | null;
+  errorBar?: boolean;
+  beforeInterval?: string | null;
+  afterInterval?: string | null;
+  // *** END_OF_CHANGE ***
   queryCachingTTL?: number | null;
   isNew?: boolean;
   refreshWhenInView = true;
@@ -389,6 +409,16 @@ export class PanelModel implements DataConfigSource, IPanelModel {
       minInterval: this.interval,
       scopedVars: this.scopedVars,
       cacheTimeout: this.cacheTimeout,
+      // *** START_OF_CHANGE ***
+      maxPBeast: this.maxPBeast === 0 ? width : this.maxPBeast || 100,
+      intervalPBeast: this.intervalPBeast || '',
+      fillGap: this.fillGap,
+      maxSelect: this.maxSelect,
+      refString: this.refString || '',
+      errorBar: this.errorBar || false,
+      beforeInterval: this.beforeInterval || '60',
+      afterInterval: this.afterInterval || '60', 
+      // *** END_OF_CHANGE ***
       queryCachingTTL: this.queryCachingTTL,
       transformations: this.transformations,
       app: this.isEditing ? CoreApp.PanelEditor : this.isViewing ? CoreApp.PanelViewer : CoreApp.Dashboard,
@@ -546,6 +576,16 @@ export class PanelModel implements DataConfigSource, IPanelModel {
     const { dataSource } = options;
     this.datasource = dataSource;
 
+    // *** START_OF_CHANGE ***
+    this.intervalPBeast = options.intervalPBeast;
+    this.maxPBeast = options.maxPBeast;
+    this.fillGap = options.fillGap;
+    this.maxSelect = options.maxSelect;
+    this.refString = options.refString;
+    this.errorBar = options.errorBar;
+    this.beforeInterval = options.beforeInterval;
+    this.afterInterval = options.afterInterval; 
+    // *** END_OF_CHANGE ***
     this.cacheTimeout = options.cacheTimeout;
     this.queryCachingTTL = options.queryCachingTTL;
     this.timeFrom = options.timeRange?.from;

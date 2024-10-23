@@ -149,6 +149,16 @@ interface PluginMetaQueryOptions {
   cacheTimeout?: boolean;
   maxDataPoints?: boolean;
   minInterval?: boolean;
+  // *** START_OF_CHANGE ***
+  fillGap?: boolean;
+  maxPBeast?: boolean;
+  intervalPBeast?: boolean;
+  maxSelect?: boolean;
+  refString?: boolean;
+  errorBar?: boolean;
+  beforeInterval?: boolean;
+  afterInterval?: boolean;
+  // *** END_OF_CHANGE ***
 }
 interface PluginQueryCachingConfig {
   enabled?: boolean;
@@ -552,6 +562,16 @@ export interface DataQueryRequest<TQuery extends DataQuery = DataQuery> {
   app: CoreApp | string;
 
   cacheTimeout?: string | null;
+  // *** START_OF_CHANGE ***
+  intervalPBeast?: string;
+  maxPBeast?: number;
+  fillGap?: string;
+  maxSelect?: boolean;
+  refString?: string;
+  errorBar?: boolean;
+  beforeInterval?: string;
+  afterInterval?: string;
+  // *** END_OF_CHANGE ***
   queryCachingTTL?: number | null;
   skipQueryCache?: boolean;
   rangeRaw?: RawTimeRange;
